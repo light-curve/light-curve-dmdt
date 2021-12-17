@@ -7,6 +7,8 @@
 Rust crate and executable to transform light curve into dm–dt space, the implementation is based on papers
 [Mahabal et al. 2011](https://ui.adsabs.harvard.edu/abs/2011BASI...39..387M), [Mahabal et al. 2017](https://arxiv.org/abs/1709.06257), [Soraisam et al. 2020](https://doi.org/10.3847/1538-4357/ab7b61).
 
+If you are looking for Python bindings for this package, please see <https://github.com/light-curve/light-curve-python>
+
 ## Executable
 
 The executable `dmdt` can be installed by running `cargo install light-curve-dmdt`. You need rust toolchain to be
