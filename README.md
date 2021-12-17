@@ -1,5 +1,9 @@
 # dm–dt map plotter
 
+[![docs.rs badge](https://docs.rs/light-curve-dmdt/badge.svg)](https://docs.rs/light-curve-dmdt)
+![testing](https://github.com/light-curve/light-curve-dmdt/actions/workflows/test.yml/badge.svg)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/light-curve/light-curve-dmdt/master.svg)](https://results.pre-commit.ci/latest/github/light-curve/light-curve-dmdt/master)
+
 Rust crate and executable to transform light curve into dm–dt space, the implementation is based on papers
 [Mahabal et al. 2011](https://ui.adsabs.harvard.edu/abs/2011BASI...39..387M), [Mahabal et al. 2017](https://arxiv.org/abs/1709.06257), [Soraisam et al. 2020](https://doi.org/10.3847/1538-4357/ab7b61).
 
