@@ -9,12 +9,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Install FFTW and GSL
-      run: |
-        sudo apt-get update
-        sudo apt-get install libfftw3-dev libgsl-dev
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
@@ -22,7 +16,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: build
-        args: --workspace --all-targets
+        args: --all-targets
     - name: Check light-curve-dmdt/{README.md,example.png}
       working-directory: light-curve-dmdt
       run: |
@@ -32,7 +26,6 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: test
-        args: --workspace
     - name: Check formatting
       uses: actions-rs/cargo@v1
       with:
@@ -42,7 +35,7 @@ jobs:
       uses: actions-rs/cargo@v1
       with:
         command: clippy
-        args: --workspace --all-targets -- -D warnings
+        args: --all-targets -- -D warnings
 
   arm:
 
@@ -50,7 +43,5 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      with:
-        submodules: true
     - name: build
-      run: cargo build --workspace --all-targets
+      run: cargo build --all-targets
