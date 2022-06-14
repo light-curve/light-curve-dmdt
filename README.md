@@ -20,7 +20,7 @@ grid `[1; 100)` with 96 cells:
 ```sh
 curl https://ztf.snad.space/dr4/csv/633207400004730 | # Get some ZTF data
 tail +2 | # chomp CSV header
-sed 's/,/	/g' | # replace commas with tabs
+awk -F, '{print $3"	"$4"	"$5}' | # print needed columns and change separator to tab
 dmdt \
   --max-abs-dm=1.5 --height=64 \
   --min-lgdt=0 --max-lgdt=2 --width=96 \
