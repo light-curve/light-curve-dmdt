@@ -10,6 +10,6 @@ updates:
     schedule:
       interval: "monthly"
   - package-ecosystem: "cargo"
-    directory: "/light-curve-dmdt"
+    directory: "/"
     schedule:
       interval: "monthly"
