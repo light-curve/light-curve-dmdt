@@ -29,7 +29,7 @@ path = "benches/lib.rs"
 harness = false
 
 [dependencies]
-clap = "^2.33.3"
+clap = "^4.0.29"
 conv = "^0.3.3"
 dyn-clonable = "^0.9.0"
 embed-doc-image = { version = "^0.1.4", optional = true }
