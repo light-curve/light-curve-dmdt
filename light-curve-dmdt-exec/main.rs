@@ -1,6 +1,6 @@
-use clap::{value_t, App, Arg, ArgMatches};
+use clap::{command, value_parser, Arg, ArgAction, ArgMatches};
 use enumflags2::{bitflags, BitFlags};
-use light_curve_dmdt::{to_png, DmDt, Eps1Over1e3Erf, ExactErf};
+use light_curve_dmdt::{ndarray, png, to_png, DmDt, Eps1Over1e3Erf, ExactErf};
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::PathBuf;
@@ -124,14 +124,17 @@ fn read_input(input: &Option<PathBuf>, errors: bool) -> Result<Tme2, MainError> 
     Ok((t, m, err2))
 }
 
-fn arg_matches() -> ArgMatches<'static> {
-    App::new("Plot dm-dt map from light curve")
+fn arg_matches() -> ArgMatches {
+    command!()
         .arg(
-            Arg::with_name("input")
-                .short("i")
+            Arg::new("input")
+                .short('i')
                 .long("input")
-                .takes_value(true)
+                .num_args(1)
                 .default_value("-")
+                .value_name("FILE")
+                .value_parser(value_parser!(PathBuf))
+                .help("input file or - for stdout")
                 .long_help(
                     "Path of the input file, should be built of space-separated columns of \
                     time, magnitude and magnitude error (required for --smare only). If '-' is \
@@ -139,21 +142,24 @@ fn arg_matches() -> ArgMatches<'static> {
                 ),
         )
         .arg(
-            Arg::with_name("output")
-                .short("o")
+            Arg::new("output")
+                .short('o')
                 .long("output")
-                .takes_value(true)
+                .num_args(1)
                 .default_value("-")
+                .value_name("FILE")
+                .value_parser(value_parser!(PathBuf))
+                .help("output file or - for stdout")
                 .long_help(
                     "Path of the output PNG file. If '-' is given (the default), then outputs \
                     to the stdout",
                 ),
         )
         .arg(
-            Arg::with_name("smear")
-                .short("s")
+            Arg::new("smear")
+                .short('s')
                 .long("smear")
-                .takes_value(false)
+                .num_args(0)
                 .help("dm smearing")
                 .long_help(
                     "Produce dm-``smeared'' output using observation errors, which must be the \
@@ -163,10 +169,12 @@ fn arg_matches() -> ArgMatches<'static> {
                 ),
         )
         .arg(
-            Arg::with_name("min lgdt")
+            Arg::new("min lgdt")
                 .long("min-lgdt")
-                .takes_value(true)
+                .num_args(1)
                 .required(true)
+                .value_name("FLOAT")
+                .value_parser(value_parser!(f32))
                 .help("left lg(dt) border")
                 .long_help(
                     "Left border of the lg(dt) grid, note that decimal logarithm is required, \
@@ -174,10 +182,12 @@ fn arg_matches() -> ArgMatches<'static> {
                 ),
         )
         .arg(
-            Arg::with_name("max lgdt")
+            Arg::new("max lgdt")
                 .long("max-lgdt")
-                .takes_value(true)
+                .num_args(1)
                 .required(true)
+                .value_name("FLOAT")
+                .value_parser(value_parser!(f32))
                 .help("right lg(dt) border")
                 .long_help(
                     "Right border of the lg(dt) grid, note that decimal logarithm is required, \
@@ -185,10 +195,12 @@ fn arg_matches() -> ArgMatches<'static> {
                 ),
         )
         .arg(
-            Arg::with_name("max abs dm")
+            Arg::new("max abs dm")
                 .long("max-abs-dm")
-                .takes_value(true)
+                .num_args(1)
                 .required(true)
+                .value_name("FLOAT")
+                .value_parser(value_parser!(f32))
                 .help("absolute value of dm border")
                 .long_help(
                     "Maximum dm value, the considered dm interval would be \
@@ -196,34 +208,36 @@ fn arg_matches() -> ArgMatches<'static> {
                 ),
         )
         .arg(
-            Arg::with_name("N lgdt")
-                .short("w")
+            Arg::new("N lgdt")
                 .long("width")
-                .takes_value(true)
+                .num_args(1)
+                .value_name("INT")
                 .default_value("128")
+                .value_parser(value_parser!(usize))
                 .help("number of lg(dt) cells, width of the output image"),
         )
         .arg(
-            Arg::with_name("N dm")
-                .short("h")
+            Arg::new("N dm")
                 .long("height")
-                .takes_value(true)
+                .num_args(1)
+                .value_name("INT")
                 .default_value("128")
+                .value_parser(value_parser!(usize))
                 .help("number of dm cells, height of the output image"),
         )
         .arg(
-            Arg::with_name("approx smearing")
+            Arg::new("approx smearing")
                 .long("approx-smearing")
-                .takes_value(false)
+                .num_args(0)
                 .help("speed up smearing using approximate error function"),
         )
         .arg(
-            Arg::with_name("normalisation")
-                .short("n")
+            Arg::new("normalisation")
+                .short('n')
                 .long("norm")
-                .takes_value(true)
-                .multiple(true)
-                .possible_values(&["lgdt", "max"])
+                .num_args(1)
+                .action(ArgAction::Append)
+                .value_parser(["lgdt", "max"])
                 .help("normalisation, any combination of: max, lgdt")
                 .long_help(
                     "Normalisation to do after dmdt map building. The order \
@@ -262,24 +276,30 @@ struct Config {
 impl Config {
     fn from_arg_matches(matches: &ArgMatches) -> Self {
         Self {
-            input: match matches.value_of("input").unwrap() {
-                "-" => None,
-                x => Some(x.into()),
+            input: {
+                let input = matches.get_one::<PathBuf>("input").unwrap();
+                match input.to_str() {
+                    Some("-") => None,
+                    _ => Some(input.clone()),
+                }
             },
-            output: match matches.value_of("output").unwrap() {
-                "-" => None,
-                x => Some(x.into()),
+            output: {
+                let output = matches.get_one::<PathBuf>("output").unwrap();
+                match output.to_str() {
+                    Some("-") => None,
+                    _ => Some(output.clone()),
+                }
             },
-            min_lgdt: value_t!(matches, "min lgdt", f32).unwrap(),
-            max_lgdt: value_t!(matches, "max lgdt", f32).unwrap(),
-            max_abs_dm: value_t!(matches, "max abs dm", f32).unwrap(),
-            n_dt: value_t!(matches, "N lgdt", usize).unwrap(),
-            n_dm: value_t!(matches, "N dm", usize).unwrap(),
-            smearing: matches.is_present("smear"),
-            approx_smearing: matches.is_present("approx smearing"),
-            norm: match matches.values_of("normalisation") {
+            min_lgdt: *matches.get_one("min lgdt").unwrap(),
+            max_lgdt: *matches.get_one("max lgdt").unwrap(),
+            max_abs_dm: *matches.get_one("max abs dm").unwrap(),
+            n_dt: *matches.get_one("N lgdt").unwrap(),
+            n_dm: *matches.get_one("N dm").unwrap(),
+            smearing: matches.get_flag("smear"),
+            approx_smearing: matches.get_flag("approx smearing"),
+            norm: match matches.get_many::<String>("normalisation") {
                 Some(values) => values
-                    .map(|s| match s {
+                    .map(|s| match s.as_str() {
                         "lgdt" => DmDtNorm::LgDt,
                         "max" => DmDtNorm::Max,
                         _ => panic!("the normalisation '{}' is not supported", s),
