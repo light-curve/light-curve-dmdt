@@ -4,15 +4,15 @@
 ![testing](https://github.com/light-curve/light-curve-dmdt/actions/workflows/test.yml/badge.svg)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/light-curve/light-curve-dmdt/master.svg)](https://results.pre-commit.ci/latest/github/light-curve/light-curve-dmdt/master)
 
-Rust crate and executable to transform light curve into dm–dt space, the implementation is based on papers
+Rust library (`light-curve-dmdt`) and executable (`light-curve-dmdt-exec`) to transform light curve into dm–dt space, the implementation is based on papers
 [Mahabal et al. 2011](https://ui.adsabs.harvard.edu/abs/2011BASI...39..387M), [Mahabal et al. 2017](https://arxiv.org/abs/1709.06257), [Soraisam et al. 2020](https://doi.org/10.3847/1538-4357/ab7b61).
 
 If you are looking for Python bindings for this package, please see <https://github.com/light-curve/light-curve-python>
 
 ## Executable
 
-The executable `dmdt` can be installed by running `cargo install light-curve-dmdt`. You need rust toolchain to be
-installed in your system, consider using you OS package manager or [rustup](https://rustup.rs) utility.
+The executable `dmdt` can be installed by running `cargo install light-curve-dmdt-exec`. You need rust toolchain to be
+installed in your system, consider using your OS package manager or [rustup](https://rustup.rs) utility.
 
 Example of conditional probability dm–dt map plotting for linear dm grid `[-1.5; 1.5)` with 64 cells and logarithmic dt
 grid `[1; 100)` with 96 cells:
