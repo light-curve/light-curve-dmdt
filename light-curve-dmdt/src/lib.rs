@@ -1,7 +1,7 @@
 #![cfg_attr(feature = "doc-images",
 cfg_attr(all(),
 doc = ::embed_doc_image::embed_image!("example_png", "../example.png")))]
-#![doc = include_str!("../../README.md")]
+#![doc = include_str!("../README.md")]
 
 #[cfg(test)]
 #[macro_use]
