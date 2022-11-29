@@ -46,7 +46,7 @@ approx = "^0.5.0"
 criterion = "^0.3"
 libm = "^0.2.1"
 mathru = "^0.10.0"
-special = "^0.8.1"
+special = "^0.10.2"
 static_assertions = "^1.1.0"
 
 [features]
