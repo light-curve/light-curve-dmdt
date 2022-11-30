@@ -11,7 +11,7 @@ PROJECT_DIR = CURRENT_DIR.parent
 
 def get_help_message():
     process = subprocess.run(
-        ["cargo", "run", "--", "--help"],
+        ["cargo", "run", "--locked", "--", "--help"],
         capture_output=True,
     )
     msg = process.stdout.decode()
@@ -73,7 +73,7 @@ def main():
     script = get_shell_example(CURRENT_DIR.joinpath("readme-example.sh"))
 
     print("Plotting example.png")
-    update_png(script.replace("dmdt", "cargo run --"))
+    update_png(script.replace("dmdt", "cargo run --locked --"))
 
     readme_path = PROJECT_DIR.joinpath("README.md")
     with open(readme_path) as fh:
