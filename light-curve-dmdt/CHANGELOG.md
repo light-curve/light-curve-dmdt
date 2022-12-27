@@ -9,27 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-—
+--
 
 ### Changed
 
-—
+--
 
 ### Deprecated
 
-—
+--
 
 ### Removed
 
-—
+--
 
 ### Fixed
 
-—
+- [docs.rs](https://docs.rs/light-curve-dmdt) build
 
 ### Security
 
-—
+--
 
 ## [0.6.0] 2022-11-30
 
