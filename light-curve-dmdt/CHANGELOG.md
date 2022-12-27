@@ -9,28 +9,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+--
+
+### Changed
+
+--
+
+### Deprecated
+
+--
+
+### Removed
+
+--
+
+### Fixed
+
+- [docs.rs](https://docs.rs/light-curve-dmdt) build
+
+### Security
+
+--
+
+## [0.6.0] 2022-11-30
+
+### Added
+
 - `light-curve-dmdt` publicly re-exports `ndarray` and `png` dependencies
 
 ### Changed
 
 - **braking** The crate was split into two: the executable was moved into a separate crate `light-curve-dmdt-exec`
 - The project repository was split from other 'light-curve*' crates and moved into <https://gituhb.com/light-curve/light-curve-dmdt>
-
-### Deprecated
-
-—
-
-### Removed
-
-—
-
-### Fixed
-
-—
-
-### Security
-
-—
 
 ## [0.5.0]
 

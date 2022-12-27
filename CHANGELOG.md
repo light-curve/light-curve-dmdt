@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+--
+
+### Changed
+
+- Bump `light-curve-dmdt` 0.6.0 -> 0.6.1
+
+### Deprecated
+
+--
+
+### Removed
+
+--
+
+### Fixed
+
+--
+
+### Security
+
+--
+
+## [0.6.0] 2022-11-30
+
+### Added
+
 - The first stand-alone release of the `dmdt` binary produced by `light-curve-dmdt-exec` crate, see `light-curve-dmdt/Changelog.md` for previous releases as a part of `light-curve-dmdt` crate
 
 ### Changed
@@ -16,19 +42,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **braking** The crate was split into two: the executable was moved into a separate crate `light-curve-dmdt-exec`
 - **braking** Update to `clap` v4 caused removing of shot arguments `-w`, `-h` and reformatted help message
 - The project repository was split from other 'light-curve*' crates and moved into <https://gituhb.com/light-curve/light-curve-dmdt>
-
-### Deprecated
-
-—
-
-### Removed
-
-—
-
-### Fixed
-
-—
-
-### Security
-
-—

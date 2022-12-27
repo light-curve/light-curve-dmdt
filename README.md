@@ -11,7 +11,7 @@ If you are looking for Python bindings for this package, please see <https://git
 
 ## Executable
 
-The executable `dmdt` can be installed by running `cargo install light-curve-dmdt-exec`. You need rust toolchain to be
+The executable `dmdt` can be installed by running `cargo install light-curve-dmdt-exec`. You need Rust toolchain to be
 installed in your system, consider using your OS package manager or [rustup](https://rustup.rs) utility.
 
 Example of conditional probability dm–dt map plotting for linear dm grid `[-1.5; 1.5)` with 64 cells and logarithmic dt
