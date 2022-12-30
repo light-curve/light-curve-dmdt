@@ -3,6 +3,8 @@ use crate::Float;
 use conv::{ConvAsUtil, ConvUtil, RoundToZero};
 use enum_dispatch::enum_dispatch;
 use ndarray::Array1;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use thiserror::Error;
 
@@ -39,11 +41,11 @@ where
 /// Grid for dm or dt axis
 #[enum_dispatch(GridTrait<T>)]
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[non_exhaustive]
 pub enum Grid<T>
 where
     T: Float,
-    Array1<T>: Clone + Debug,
 {
     Array(ArrayGrid<T>),
     Linear(LinearGrid<T>),
@@ -53,7 +55,6 @@ where
 impl<T> Grid<T>
 where
     T: Float,
-    Array1<T>: Clone + Debug,
 {
     pub fn array(borders: Array1<T>) -> Result<Self, ArrayGridError> {
         ArrayGrid::new(borders).map(Into::into)
@@ -85,13 +86,13 @@ pub enum ArrayGridError {
 ///
 /// Lookup time is O(lb n)
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ArrayGrid<T> {
     borders: Array1<T>,
 }
 
 impl<T> ArrayGrid<T>
 where
-    Array1<T>: Clone + Debug,
     T: Float,
 {
     /// Wraps given array into [ArrayGrid] or return an error
@@ -110,7 +111,6 @@ where
 
 impl<T> GridTrait<T> for ArrayGrid<T>
 where
-    Array1<T>: Clone + Debug,
     T: Float,
 {
     #[inline]
@@ -136,6 +136,7 @@ where
 ///
 /// Lookup time is O(1)
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct LinearGrid<T> {
     start: T,
     end: T,
@@ -220,10 +221,8 @@ where
 ///
 /// Lookup time is O(1)
 #[derive(Clone, Debug)]
-pub struct LgGrid<T>
-where
-    T: Copy,
-{
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct LgGrid<T> {
     start: T,
     end: T,
     lg_start: T,

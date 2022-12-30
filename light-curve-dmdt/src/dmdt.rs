@@ -2,14 +2,16 @@ use crate::{CellIndex, ErfFloat, ErrorFunction, Float, Grid, GridTrait, LgGrid, 
 
 use itertools::Itertools;
 use ndarray::{s, Array1, Array2};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
 /// dm–dt map plotter
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct DmDt<T>
 where
     T: Float,
-    Array1<T>: Clone + Debug,
 {
     pub dt_grid: Grid<T>,
     pub dm_grid: Grid<T>,
@@ -18,7 +20,6 @@ where
 impl<T> DmDt<T>
 where
     T: Float,
-    Array1<T>: Clone + Debug,
 {
     /// Create new [DmDt]
     pub fn from_grids<Gdt, Gdm>(dt_grid: Gdt, dm_grid: Gdm) -> Self
@@ -228,8 +229,8 @@ mod test {
     use ndarray::Axis;
     use static_assertions::assert_impl_all;
 
-    assert_impl_all!(DmDt<f32>: Clone, Debug, Send, Sync);
-    assert_impl_all!(DmDt<f64>: Clone, Debug, Send, Sync);
+    assert_impl_all!(DmDt<f32>: Clone, Debug, Send, Sync, Serialize, Deserialize<'static>);
+    assert_impl_all!(DmDt<f64>: Clone, Debug, Send, Sync, Serialize, Deserialize<'static>);
 
     #[test]
     fn dt_points_vs_points() {

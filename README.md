@@ -103,4 +103,8 @@ let prob = dmdt.cond_prob::<Eps1Over1e3Erf>(t.as_slice().unwrap(), m.as_slice().
 ```
 
 Cargo features:
+- `doc-images` (non-default): adds an example image to HTML docs, used for <https://docs.rs>
 - `png` (non-default): add `to_png()` function to save dm-dt map as a PNG file
+- `serde` (default): `serde` implementation for `DmDt`
+- `default`: `[]` - no default features
+- `full`: turns all features on
