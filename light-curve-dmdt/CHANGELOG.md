@@ -9,10 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
---
+- `serde` non-default Cargo feature for `DmDt` (de)serialization, brings optional `serde` v1 crate and turns on `ndarray/serde` feature https://github.com/light-curve/light-curve-dmdt/pull/18
 
 ### Changed
 
+- **breaking** `to_png()` function and `png` crate re-export are now under non-default `png` Cargo feature
 - **Braking** `Grid` trait is renamed to `GridTrait`, while `Grid` enum is introduced to handle all grid variants https://github.com/light-curve/light-curve-dmdt/pull/17
 
 ### Deprecated

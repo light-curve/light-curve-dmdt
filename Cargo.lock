@@ -458,10 +458,12 @@ dependencies = [
  "enum_dispatch",
  "itertools",
  "libm",
+ "light-curve-dmdt",
  "mathru",
  "ndarray",
  "num-traits",
  "png",
+ "serde",
  "special",
  "static_assertions",
  "thiserror",
@@ -540,6 +542,7 @@ dependencies = [
  "num-integer",
  "num-traits",
  "rawpointer",
+ "serde",
 ]
 
 [[package]]
