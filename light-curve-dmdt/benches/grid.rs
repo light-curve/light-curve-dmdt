@@ -1,7 +1,29 @@
 use conv::*;
 use criterion::{black_box, Criterion};
-use light_curve_dmdt::{ArrayGrid, DmDt, Float};
+use light_curve_dmdt::{ArrayGrid, DmDt, Float, Grid, LinearGrid};
 use ndarray::Array1;
+
+pub fn bench_linear_grid_idx(c: &mut Criterion) {
+    let values = [-0.1_f32, 0.0, 0.5, 0.9, 1.0, 1.1];
+
+    let linear_grid = LinearGrid::new(0.0_f32, 1.0, 33);
+    let linear_grid_boxed: Box<dyn Grid<_>> = Box::new(linear_grid.clone());
+
+    c.bench_function("LinearGrid::idx", |b| {
+        b.iter(|| {
+            for &x in values.iter() {
+                black_box(black_box(&linear_grid).idx(black_box(x)));
+            }
+        })
+    });
+    c.bench_function("wrapped LinearGrid::idx", |b| {
+        b.iter(|| {
+            for &x in values.iter() {
+                black_box(black_box(&linear_grid_boxed).idx(black_box(x)));
+            }
+        })
+    });
+}
 
 pub fn bench_log_linear_grids<T>(c: &mut Criterion)
 where
@@ -45,7 +67,9 @@ where
         .as_str(),
         |b| {
             b.iter(|| {
-                black_box(dmdt_lg_linear.points(t.as_slice().unwrap(), m.as_slice().unwrap()));
+                black_box(
+                    dmdt_lg_linear.points(black_box(t.as_slice().unwrap()), m.as_slice().unwrap()),
+                );
             })
         },
     );
@@ -54,7 +78,9 @@ where
         format!("DmDt<{}>::points, array grids", std::any::type_name::<T>()).as_str(),
         |b| {
             b.iter(|| {
-                black_box(dmdt_arrays.points(t.as_slice().unwrap(), m.as_slice().unwrap()));
+                black_box(
+                    dmdt_arrays.points(black_box(t.as_slice().unwrap()), m.as_slice().unwrap()),
+                );
             })
         },
     );
