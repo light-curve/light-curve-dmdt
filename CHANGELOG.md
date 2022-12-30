@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump `light-curve-dmdt` 0.6.0 -> 0.6.1
+--
 
 ### Deprecated
 
@@ -30,6 +30,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 --
+
+## [0.6.1] 2022-12-30
+
+### Changed
+
+- Bump `light-curve-dmdt` 0.6.0 -> 0.7.0
 
 ## [0.6.0] 2022-11-30
 

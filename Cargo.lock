@@ -471,7 +471,7 @@ dependencies = [
 
 [[package]]
 name = "light-curve-dmdt-exec"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "clap 4.0.32",
  "enumflags2",
