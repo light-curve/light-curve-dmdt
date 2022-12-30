@@ -33,6 +33,20 @@ jobs:
         ./.ci/compose-readme.py
         git diff --word-diff --exit-code
 
+  msrv-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get minimum supported Rust version
+        run: echo "::set-output name=msrv::$(grep '^rust-version = ' Cargo.toml | grep -o '[0-9.]\+')"
+        id: get_msrv
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.get_msrv.outputs.msrv }}
+      - name: Build
+        run: cargo +${{ steps.get_msrv.outputs.msrv }} build --all-targets --all-features
+
   arm:
     runs-on: [self-hosted, linux, ARM64]
     steps:
