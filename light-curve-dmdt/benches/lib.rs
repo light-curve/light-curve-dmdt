@@ -11,7 +11,7 @@ mod gausses;
 use gausses::bench_gausses;
 
 mod grid;
-use grid::bench_log_linear_grids;
+use grid::{bench_linear_grid_idx, bench_log_linear_grids};
 
 criterion_group!(benches_cond_prob, bench_cond_prob);
 criterion_group!(
@@ -24,6 +24,7 @@ criterion_group!(
 criterion_group!(benches_gausses, bench_gausses<f32>, bench_gausses<f64>);
 criterion_group!(
     benches_grid,
+    bench_linear_grid_idx,
     bench_log_linear_grids<f32>,
     bench_log_linear_grids<f64>
 );

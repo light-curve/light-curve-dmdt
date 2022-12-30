@@ -8,7 +8,7 @@ doc = ::embed_doc_image::embed_image!("example_png", "example.png")))]
 extern crate static_assertions;
 
 use conv::*;
-use dyn_clonable::*;
+use enum_dispatch::enum_dispatch;
 use itertools::Itertools;
 pub use ndarray;
 use ndarray::{s, Array1, Array2};
@@ -23,13 +23,13 @@ pub use erf::{Eps1Over1e3Erf, ErfFloat, ErrorFunction, ExactErf};
 mod float_trait;
 pub use float_trait::Float;
 
-/// Grid for dm or dt axis
-#[clonable]
-pub trait Grid<T>: Clone + Debug + Send + Sync
+/// Grid trait for dm or dt axis
+#[enum_dispatch]
+pub trait GridTrait<T>: Clone + Debug + Send + Sync
 where
     T: Copy,
 {
-    /// Cell borders coordinates, [cell_count()](Grid::cell_count) + 1 length [Array1]
+    /// Cell borders coordinates, [cell_count()](GridTrait::cell_count) + 1 length [Array1]
     fn get_borders(&self) -> &Array1<T>;
 
     /// Number of cells
@@ -51,6 +51,42 @@ where
     ///
     /// Note that cells include their left borders but doesn't include right borders
     fn idx(&self, x: T) -> CellIndex;
+}
+
+/// Grid for dm or dt axis
+#[enum_dispatch(GridTrait<T>)]
+#[derive(Clone, Debug)]
+#[non_exhaustive]
+pub enum Grid<T>
+where
+    T: Float,
+    Array1<T>: Clone + Debug,
+{
+    Array(ArrayGrid<T>),
+    Linear(LinearGrid<T>),
+    Lg(LgGrid<T>),
+}
+
+impl<T> Grid<T>
+where
+    T: Float,
+    Array1<T>: Clone + Debug,
+{
+    pub fn array(borders: Array1<T>) -> Result<Self, ArrayGridError> {
+        ArrayGrid::new(borders).map(Into::into)
+    }
+
+    pub fn linear(start: T, end: T, n: usize) -> Self {
+        LinearGrid::new(start, end, n).into()
+    }
+
+    pub fn log_from_start_end(start: T, end: T, n: usize) -> Self {
+        LgGrid::from_start_end(start, end, n).into()
+    }
+
+    pub fn log_from_lg_start_end(lg_start: T, lg_end: T, n: usize) -> Self {
+        LgGrid::from_lg_start_end(lg_start, lg_end, n).into()
+    }
 }
 
 /// Checks if slice is sorted and have no duplicates
@@ -100,7 +136,7 @@ where
     }
 }
 
-impl<T> Grid<T> for ArrayGrid<T>
+impl<T> GridTrait<T> for ArrayGrid<T>
 where
     Array1<T>: Clone + Debug,
     T: Float,
@@ -165,7 +201,7 @@ where
     }
 }
 
-impl<T> Grid<T> for LinearGrid<T>
+impl<T> GridTrait<T> for LinearGrid<T>
 where
     T: Float,
 {
@@ -283,7 +319,7 @@ where
     }
 }
 
-impl<T> Grid<T> for LgGrid<T>
+impl<T> GridTrait<T> for LgGrid<T>
 where
     T: Float,
 {
@@ -326,7 +362,7 @@ where
     }
 }
 
-/// Value to return from [Grid::idx]
+/// Value to return from [GridTrait::idx]
 pub enum CellIndex {
     /// Bellow the leftmost border
     LowerMin,
@@ -340,25 +376,27 @@ pub enum CellIndex {
 #[derive(Clone, Debug)]
 pub struct DmDt<T>
 where
-    T: Copy,
+    T: Float,
+    Array1<T>: Clone + Debug,
 {
-    pub dt_grid: Box<dyn Grid<T>>,
-    pub dm_grid: Box<dyn Grid<T>>,
+    pub dt_grid: Grid<T>,
+    pub dm_grid: Grid<T>,
 }
 
 impl<T> DmDt<T>
 where
     T: Float,
+    Array1<T>: Clone + Debug,
 {
     /// Create new [DmDt]
     pub fn from_grids<Gdt, Gdm>(dt_grid: Gdt, dm_grid: Gdm) -> Self
     where
-        Gdt: Grid<T> + 'static,
-        Gdm: Grid<T> + 'static,
+        Gdt: Into<Grid<T>>,
+        Gdm: Into<Grid<T>>,
     {
         Self {
-            dt_grid: Box::new(dt_grid),
-            dm_grid: Box::new(dm_grid),
+            dt_grid: dt_grid.into(),
+            dm_grid: dm_grid.into(),
         }
     }
 

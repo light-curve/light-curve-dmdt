@@ -22,8 +22,8 @@ harness = false
 
 [dependencies]
 conv = "0.3.3"
-dyn-clonable = "0.9"
 embed-doc-image = { version = "0.1.4", optional = true }
+enum_dispatch = "0.3.9"
 itertools = "0.10"
 libm = "0.2.1" # erf
 ndarray = "0.15.3"
