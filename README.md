@@ -101,3 +101,6 @@ let err2 = Array1::ones(t.len()) * 0.01;
 
 let prob = dmdt.cond_prob::<Eps1Over1e3Erf>(t.as_slice().unwrap(), m.as_slice().unwrap(), err2.as_slice().unwrap());
 ```
+
+Cargo features:
+- `png` (non-default): add `to_png()` function to save dm-dt map as a PNG file

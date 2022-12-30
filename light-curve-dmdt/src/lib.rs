@@ -12,15 +12,19 @@ use enum_dispatch::enum_dispatch;
 use itertools::Itertools;
 pub use ndarray;
 use ndarray::{s, Array1, Array2};
-pub use png;
 use std::fmt::Debug;
-use std::io::Write;
 use thiserror::Error;
 
 mod erf;
 pub use erf::{Eps1Over1e3Erf, ErfFloat, ErrorFunction, ExactErf};
 
 mod float_trait;
+
+#[cfg(feature = "png")]
+mod images;
+#[cfg(feature = "png")]
+pub use images::{png, to_png};
+
 pub use float_trait::Float;
 
 /// Grid trait for dm or dt axis
@@ -583,24 +587,6 @@ where
             });
         a
     }
-}
-
-/// Convert [u8] dm–dt map into PNG image
-pub fn to_png<W>(w: W, a: &Array2<u8>) -> Result<(), png::EncodingError>
-where
-    W: Write,
-{
-    let transposed = {
-        let mut b = Array2::zeros((a.ncols(), a.nrows()));
-        b.assign(&a.t());
-        b
-    };
-    let mut encoder = png::Encoder::new(w, transposed.ncols() as u32, transposed.nrows() as u32);
-    encoder.set_color(png::ColorType::Grayscale);
-    encoder.set_depth(png::BitDepth::Eight);
-    let mut writer = encoder.write_header()?;
-    writer.write_image_data(transposed.as_slice().unwrap())?;
-    Ok(())
 }
 
 #[cfg(test)]
