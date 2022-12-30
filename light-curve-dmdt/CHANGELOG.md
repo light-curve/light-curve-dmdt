@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 --
 
+## [0.7.1] 2022-12-30
+
+### Added
+
+- Explicitly set the minimum supported Rust version to 1.60
+
 ## [0.7.0] 2022-12-30
 
 ### Added

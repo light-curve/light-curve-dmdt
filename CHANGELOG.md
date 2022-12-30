@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
---
+- Explicitly set the minimum supported Rust version to 1.60
 
 ### Changed
 
