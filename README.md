@@ -80,9 +80,9 @@ Options:
           save dmdt map as a PNG file.
           [possible values: lgdt, max]
   -h, --help
-          Print help information (use `-h` for a summary)
+          Print help (see a summary with '-h')
   -V, --version
-          Print version information
+          Print version
 ```
 
 </details>
