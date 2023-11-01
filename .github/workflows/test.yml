@@ -6,28 +6,28 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: cargo-test
       run: cargo test --all-features --workspace
 
   fmt:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: cargo-fmt
       run: cargo fmt -- --check
 
   clippy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: cargo-clippy
       run: cargo clippy --all-targets --all-features --workspace -- -D warnings
 
   readme:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Check README.md and example.png
       run: |
         ./.ci/compose-readme.py
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Get minimum supported Rust version
         run: echo "::set-output name=msrv::$(grep '^rust-version = ' Cargo.toml | grep -o '[0-9.]\+')"
         id: get_msrv
@@ -50,6 +50,6 @@ jobs:
   arm:
     runs-on: [self-hosted, linux, ARM64]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: build
       run: cargo build --all-targets --all-features --workspace
