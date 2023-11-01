@@ -29,7 +29,7 @@ itertools = "0.10"
 libm = "0.2.8" # erf
 ndarray = "0.15.3"
 num-traits = "0.2.14"
-png = { version = "0.17.1", optional = true }
+png = { version = "0.17.10", optional = true }
 serde = {version = "1", features = ["derive"], optional = true}
 thiserror = "1"
 
