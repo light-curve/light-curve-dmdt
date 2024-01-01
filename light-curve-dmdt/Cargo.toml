@@ -38,7 +38,7 @@ light-curve-dmdt = {path = ".", features = ["full"]}
 approx = "0.5"
 criterion = "0.4"
 mathru = "0.14"
-special = "0.10.2"
+special = "0.10.3"
 static_assertions = "1.1"
 
 [features]
