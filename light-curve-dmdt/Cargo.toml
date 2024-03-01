@@ -37,7 +37,7 @@ thiserror = "1"
 light-curve-dmdt = {path = ".", features = ["full"]}
 approx = "0.5"
 criterion = "0.4"
-mathru = "0.14"
+mathru = "0.15"
 special = "0.10.3"
 static_assertions = "1.1"
 
