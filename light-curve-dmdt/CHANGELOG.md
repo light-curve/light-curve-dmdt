@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
---
+- **Breaking** update `ndarray` to 0.16, it is breaking because we publicly re-export it
+- **Breaking** minimum supported Rust version is set to 1.67
 
 ### Deprecated
 
@@ -41,13 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `serde` non-default Cargo feature for `DmDt` (de)serialization, brings optional `serde` v1 crate and turns on `ndarray/serde` feature https://github.com/light-curve/light-curve-dmdt/pull/18
+- `serde` non-default Cargo feature for `DmDt` (de)serialization, brings optional `serde` v1 crate and turns on
+  `ndarray/serde` feature https://github.com/light-curve/light-curve-dmdt/pull/18
 
 ### Changed
 
 - **breaking** `to_png()` function and `png` crate re-export are now under non-default `png` Cargo feature
-- **Braking** `Grid` trait is renamed to `GridTrait`, while `Grid` enum is introduced to handle all grid variants https://github.com/light-curve/light-curve-dmdt/pull/17
-
+- **Braking** `Grid` trait is renamed to `GridTrait`, while `Grid` enum is introduced to handle all grid
+  variants https://github.com/light-curve/light-curve-dmdt/pull/17
 
 ## [0.6.1] 2022-12-28
 
@@ -64,7 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **braking** The crate was split into two: the executable was moved into a separate crate `light-curve-dmdt-exec`
-- The project repository was split from other 'light-curve*' crates and moved into <https://gituhb.com/light-curve/light-curve-dmdt>
+- The project repository was split from other 'light-curve*' crates and moved
+  into <https://gituhb.com/light-curve/light-curve-dmdt>
 
 ## [0.5.0]
 
@@ -87,7 +90,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `ndarray` is updated to 0.15.3, it is a breaking change
-
 
 ## [0.3.x]
 
