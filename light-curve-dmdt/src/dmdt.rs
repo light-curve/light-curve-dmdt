@@ -299,7 +299,7 @@ mod test {
         assert_abs_diff_eq!(
             from_gausses_dt_points.as_slice().unwrap(),
             from_cond_prob.as_slice().unwrap(),
-            epsilon = std::f32::EPSILON,
+            epsilon = f32::EPSILON,
         );
     }
 }
