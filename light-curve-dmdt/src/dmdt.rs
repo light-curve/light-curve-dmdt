@@ -286,7 +286,7 @@ mod test {
             );
             let dt_points = dmdt.dt_points(t.as_slice().unwrap());
             let dt_non_zero_points = dt_points.mapv(|x| if x == 0 { 1.0 } else { x as f32 });
-            map /= &dt_non_zero_points.into_shape((map.nrows(), 1)).unwrap();
+            map /= &dt_non_zero_points.to_shape((map.nrows(), 1)).unwrap();
             map
         };
 
@@ -299,7 +299,7 @@ mod test {
         assert_abs_diff_eq!(
             from_gausses_dt_points.as_slice().unwrap(),
             from_cond_prob.as_slice().unwrap(),
-            epsilon = std::f32::EPSILON,
+            epsilon = f32::EPSILON,
         );
     }
 }

@@ -21,7 +21,7 @@ pub fn bench_cond_prob(c: &mut Criterion) {
                 );
                 let dt_points = dmdt.dt_points(t.as_slice().unwrap());
                 let dt_points_no_zeros = dt_points.mapv(|x| if x == 0 { 1.0 } else { x as f32 });
-                map /= &dt_points_no_zeros.into_shape((map.nrows(), 1)).unwrap();
+                map /= &dt_points_no_zeros.to_shape((map.nrows(), 1)).unwrap();
                 black_box(map);
             })
         },

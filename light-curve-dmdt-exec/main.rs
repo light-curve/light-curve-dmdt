@@ -49,7 +49,7 @@ fn main() -> Result<(), MainError> {
             if config.norm.contains(DmDtNorm::LgDt) {
                 let lgdt = dmdt.dt_points(&t);
                 let lgdt_no_zeros = lgdt.mapv(|x| if x == 0 { 1.0 } else { x as f32 });
-                map_float /= &lgdt_no_zeros.into_shape((map_float.nrows(), 1)).unwrap();
+                map_float /= &lgdt_no_zeros.to_shape((map_float.nrows(), 1)).unwrap();
             }
             if config.norm.contains(DmDtNorm::Max) {
                 let max = *map_float
