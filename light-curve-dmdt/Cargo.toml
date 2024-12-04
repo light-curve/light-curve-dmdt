@@ -25,20 +25,20 @@ harness = false
 conv = "0.3.3"
 embed-doc-image = { version = "0.1.4", optional = true }
 enum_dispatch = "0.3.12"
-itertools = "0.12"
+itertools = "0.13"
 libm = "0.2.8" # erf
 ndarray = "0.15.3"
 num-traits = "0.2.14"
 png = { version = "0.17.1", optional = true }
-serde = {version = "1", features = ["derive"], optional = true}
-thiserror = "1"
+serde = { version = "1", features = ["derive"], optional = true }
+thiserror = "2"
 
 [dev-dependencies]
-light-curve-dmdt = {path = ".", features = ["full"]}
+light-curve-dmdt = { path = ".", features = ["full"] }
 approx = "0.5"
-criterion = "0.4"
-mathru = "0.14"
-special = "0.10.3"
+criterion = "0.5"
+mathru = "0.15"
+special = "0.11"
 static_assertions = "1.1"
 
 [features]
