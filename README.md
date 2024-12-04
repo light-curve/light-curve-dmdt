@@ -39,50 +39,72 @@ dmdt \
 
 ```text
 Program for dm-dt maps generator from light curves
+
 Usage: dmdt [OPTIONS] --min-lgdt <FLOAT> --max-lgdt <FLOAT> --max-abs-dm <FLOAT>
+
 Options:
   -i, --input <FILE>
-          Path of the input file, should be built of space-separated columns of time, magnitude and
-          magnitude error (required for --smare only). If '-' is given (the default), then the input
-          is taken from the stdin
+          Path of the input file, should be built of space-separated columns of time,
+          magnitude and magnitude error (required for --smare only). If '-' is given
+          (the default), then the input is taken from the stdin
+
           [default: -]
+
   -o, --output <FILE>
-          Path of the output PNG file. If '-' is given (the default), then outputs to the stdout
+          Path of the output PNG file. If '-' is given (the default), then outputs to
+          the stdout
+
           [default: -]
+
   -s, --smear
-          Produce dm-``smeared'' output using observation errors, which must be the third column of
-          the input. Instead of just adding some value to the lg(dt)-dm cell, the whole lg(dt) =
-          const row is filled by normally distributed dm-probabilities
+          Produce dm-``smeared'' output using observation errors, which must be the
+          third column of the input. Instead of just adding some value to the
+          lg(dt)-dm cell, the whole lg(dt) = const row is filled by normally
+          distributed dm-probabilities
+
       --min-lgdt <FLOAT>
-          Left border of the lg(dt) grid, note that decimal logarithm is required, i.e. -1.0 input
-          means 0.1 time units
+          Left border of the lg(dt) grid, note that decimal logarithm is required,
+          i.e. -1.0 input means 0.1 time units
+
       --max-lgdt <FLOAT>
-          Right border of the lg(dt) grid, note that decimal logarithm is required, i.e. 2.0 input
-          means 100.0 time units
+          Right border of the lg(dt) grid, note that decimal logarithm is required,
+          i.e. 2.0 input means 100.0 time units
+
       --max-abs-dm <FLOAT>
-          Maximum dm value, the considered dm interval would be [-max-abs-dm, +max-abs-dm)
+          Maximum dm value, the considered dm interval would be [-max-abs-dm,
+          +max-abs-dm)
+
       --width <INT>
           number of lg(dt) cells, width of the output image
+
           [default: 128]
+
       --height <INT>
           number of dm cells, height of the output image
+
           [default: 128]
+
       --approx-smearing
           speed up smearing using approximate error function
+
   -n, --norm <normalisation>
-          Normalisation to do after dmdt map building. The order of operations is:1) build dmdt map,
-          each dm-lgdt pair brings a unity value to dmdt space;2) if --norm=lgdt, then divide each
-          cell value by the total number of the corresponding lgdt pairs, i.e. divide each cell of
-          some column by the integral value in the column (including values out of the interval of
-          [-max_abs_dm; max_abs_dm)); 3) if --norm=max, then divide each cell by the overall maximum
-          value; 4) if any of --norm=lgdt or --norm=max is specified, then all values should be in
-          [0; 1] interval, so they are multiplied by 255 and casted to uint8 to make it possible to
-          save dmdt map as a PNG file.
+          Normalisation to do after dmdt map building. The order of operations is:1)
+          build dmdt map, each dm-lgdt pair brings a unity value to dmdt space;2) if
+          --norm=lgdt, then divide each cell value by the total number of the
+          corresponding lgdt pairs, i.e. divide each cell of some column by the
+          integral value in the column (including values out of the interval of
+          [-max_abs_dm; max_abs_dm)); 3) if --norm=max, then divide each cell by the
+          overall maximum value; 4) if any of --norm=lgdt or --norm=max is specified,
+          then all values should be in [0; 1] interval, so they are multiplied by 255
+          and casted to uint8 to make it possible to save dmdt map as a PNG file.
+
           [possible values: lgdt, max]
+
   -h, --help
-          Print help information (use `-h` for a summary)
+          Print help (see a summary with '-h')
+
   -V, --version
-          Print version information
+          Print version
 ```
 
 </details>
