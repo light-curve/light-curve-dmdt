@@ -13,8 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Breaking** update `ndarray` to 0.16, it is breaking because we publicly re-export it
-- **Breaking** minimum supported Rust version is set to 1.67
+--
 
 ### Deprecated
 
@@ -31,6 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 --
+
+## [0.8.0] 2024-12-04
+
+### Changed
+
+- **Breaking** update `ndarray` to 0.16, it is breaking because we publicly re-export it
+- **Breaking** minimum supported Rust version is set to 1.67
 
 ## [0.7.1] 2022-12-30
 
