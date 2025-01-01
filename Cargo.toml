@@ -23,7 +23,7 @@ codegen-units = 1
 [dependencies]
 # both clap and clap_lax are set for current MSRV
 clap = { version = "=4.3", features = ["cargo", "wrap_help"] }
-clap_lex = "=0.5.0"
+clap_lex = "=0.7.4"
 enumflags2 = "0.7"
 thiserror = "2"
 
