@@ -469,6 +469,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd8852c2190439a46c77861aca230080cc9db4064be7f9de8ee81816d6c72c25"
 dependencies = [
  "fast_polynomial",
+]
+
+[[package]]
+name = "lambert_w"
+version = "1.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ee712885ade8423d61555fffa027c33a02e1e62e20c3356c379994073893e8f"
+dependencies = [
  "libm",
 ]
 
@@ -535,7 +543,7 @@ version = "0.15.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "123f898dd4a19c6d38fab5ed367b88df0a62d469da3275884f9fedddaf208c3d"
 dependencies = [
- "lambert_w",
+ "lambert_w 0.5.9",
  "matrixmultiply",
  "rand",
 ]
@@ -610,7 +618,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
- "libm",
 ]
 
 [[package]]
@@ -872,11 +879,11 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "special"
-version = "0.11.2"
+version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98d279079c3ddec4e7851337070c1055a18b8f606bba0b1aeb054bc059fc2e27"
+checksum = "15e561befc4a32ae79f0c3c391ed2f1d30d86a4c5bc08668f080e8daa417a2f9"
 dependencies = [
- "lambert_w",
+ "lambert_w 1.0.8",
  "libm",
 ]
 
