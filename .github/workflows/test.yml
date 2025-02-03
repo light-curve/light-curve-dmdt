@@ -4,7 +4,12 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+
     steps:
     - uses: actions/checkout@v4
     - name: cargo-test
@@ -12,6 +17,7 @@ jobs:
 
   fmt:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v4
     - name: cargo-fmt
@@ -19,6 +25,7 @@ jobs:
 
   clippy:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v4
     - name: cargo-clippy
@@ -26,12 +33,21 @@ jobs:
 
   readme:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v4
     - name: Check README.md and example.png
       run: |
         ./.ci/compose-readme.py
         git diff --word-diff --exit-code
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: cargo build
+      run: cargo build --all-targets --all-features --workspace
 
   msrv-build:
     runs-on: ubuntu-latest
@@ -46,10 +62,3 @@ jobs:
           toolchain: ${{ steps.get_msrv.outputs.msrv }}
       - name: Build
         run: cargo +${{ steps.get_msrv.outputs.msrv }} build --all-targets --all-features
-
-  arm:
-    runs-on: [self-hosted, linux, ARM64]
-    steps:
-    - uses: actions/checkout@v4
-    - name: build
-      run: cargo build --all-targets --all-features --workspace
