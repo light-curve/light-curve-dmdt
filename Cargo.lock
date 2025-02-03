@@ -346,15 +346,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "fast_polynomial"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "62eea6ee590b08a5f8b1139f4d6caee195b646d0c07e4b1808fbd5c4dea4829a"
-dependencies = [
- "num-traits",
-]
-
-[[package]]
 name = "fdeflate"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -464,15 +455,6 @@ dependencies = [
 
 [[package]]
 name = "lambert_w"
-version = "0.5.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd8852c2190439a46c77861aca230080cc9db4064be7f9de8ee81816d6c72c25"
-dependencies = [
- "fast_polynomial",
-]
-
-[[package]]
-name = "lambert_w"
 version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2ee712885ade8423d61555fffa027c33a02e1e62e20c3356c379994073893e8f"
@@ -539,11 +521,11 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "mathru"
-version = "0.15.4"
+version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "123f898dd4a19c6d38fab5ed367b88df0a62d469da3275884f9fedddaf208c3d"
+checksum = "f3df2d16c016b28cd94248072b6cd8106d8abd7184ec90ea09660c4b7fa989f1"
 dependencies = [
- "lambert_w 0.5.9",
+ "lambert_w",
  "matrixmultiply",
  "rand",
 ]
@@ -883,7 +865,7 @@ version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "15e561befc4a32ae79f0c3c391ed2f1d30d86a4c5bc08668f080e8daa417a2f9"
 dependencies = [
- "lambert_w 1.0.8",
+ "lambert_w",
  "libm",
 ]
 
