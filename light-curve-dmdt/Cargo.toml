@@ -26,7 +26,7 @@ conv = "0.3.3"
 embed-doc-image = { version = "0.1.4", optional = true }
 enum_dispatch = "0.3.12"
 itertools = "0.14"
-libm = "0.2.8" # erf
+libm = "0.2.13" # erf
 ndarray = "0.16.1"
 num-traits = "0.2.14"
 png = { version = "0.17.16", optional = true }
