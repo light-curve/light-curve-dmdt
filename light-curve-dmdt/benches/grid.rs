@@ -1,5 +1,5 @@
 use conv::*;
-use criterion::{black_box, Criterion};
+use criterion::{Criterion, black_box};
 use light_curve_dmdt::{DmDt, Float, Grid, GridTrait, LinearGrid};
 use ndarray::Array1;
 

@@ -1,6 +1,6 @@
-use clap::{command, value_parser, Arg, ArgAction, ArgMatches};
-use enumflags2::{bitflags, BitFlags};
-use light_curve_dmdt::{ndarray, png, to_png, DmDt, Eps1Over1e3Erf, ExactErf};
+use clap::{Arg, ArgAction, ArgMatches, command, value_parser};
+use enumflags2::{BitFlags, bitflags};
+use light_curve_dmdt::{DmDt, Eps1Over1e3Erf, ExactErf, ndarray, png, to_png};
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::PathBuf;
