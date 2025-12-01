@@ -11,11 +11,6 @@ This is a Cargo workspace with two crates:
 - `light-curve-dmdt` (library crate in `light-curve-dmdt/`): Core library for dm-dt map generation
 - `light-curve-dmdt-exec` (binary crate, root `Cargo.toml`): Command-line executable `dmdt`
 
-## Rust Version Requirements
-
-- Minimum Supported Rust Version (MSRV): 1.67
-- Edition: 2018
-
 ## Building and Testing
 
 ```bash
@@ -67,3 +62,18 @@ Changes should be documented in:
 - `light-curve-dmdt/CHANGELOG.md`: For `light-curve-dmdt` library
 
 Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
+
+## Regenerating README Example
+
+When modifying the example shell script in `.ci/readme-example.sh`, regenerate the README and example PNG:
+
+```bash
+./.ci/compose-readme.py
+```
+
+This script:
+1. Runs the example from `.ci/readme-example.sh` to regenerate `example.png`
+2. Updates `README.md` with the current `--help` output
+3. Updates `README.md` with the example shell script
+
+The CI workflow verifies that `README.md` and `example.png` are up-to-date by running this script and checking for uncommitted changes.
