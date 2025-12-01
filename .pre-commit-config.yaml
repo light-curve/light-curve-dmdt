@@ -31,3 +31,9 @@ repos:
         language: python
         pass_filenames: false
         files: (^\.ci/readme-example\.sh$|^README\.md$|^example\.png$)
+
+# pre-commit.ci settings
+# Skip rust things due to
+# https://github.com/pre-commit-ci/issues/issues/89
+ci:
+    skip: [clippy, cargo-check, fmt, compose-readme]
