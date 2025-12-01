@@ -16,7 +16,7 @@ def get_help_message():
     )
     msg = process.stdout.decode()
     msg = msg.strip()
-    msg = re.sub("\s+$", "", msg, flags=re.MULTILINE)
+    msg = re.sub(r"\s+$", "", msg, flags=re.MULTILINE)
     return msg
 
 
