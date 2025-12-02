@@ -1,5 +1,5 @@
 use conv::*;
-use criterion::{black_box, Criterion};
+use criterion::{Criterion, black_box};
 use light_curve_dmdt::{DmDt, Eps1Over1e3Erf, ErfFloat, ExactErf};
 use ndarray::Array1;
 

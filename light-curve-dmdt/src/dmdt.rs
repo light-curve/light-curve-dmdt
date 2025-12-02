@@ -1,7 +1,7 @@
 use crate::{CellIndex, ErfFloat, ErrorFunction, Float, Grid, GridTrait, LgGrid, LinearGrid};
 
 use itertools::Itertools;
-use ndarray::{s, Array1, Array2};
+use ndarray::{Array1, Array2, s};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;

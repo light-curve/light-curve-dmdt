@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
---
+- **Build breaking** bump minimum supported Rust version to 1.85 https://github.com/light-curve/light-curve-dmdt/pull/93
+- Update Rust edition to 2024 https://github.com/light-curve/light-curve-dmdt/pull/93
+- **Breaking** update `png` to 0.18 https://github.com/light-curve/light-curve-dmdt/pull/93
 
 ### Deprecated
 
