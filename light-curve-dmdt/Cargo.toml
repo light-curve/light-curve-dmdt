@@ -1,6 +1,6 @@
 [package]
 name = "light-curve-dmdt"
-version = "0.8.0"
+version = "0.9.0"
 description = "dm-dt maps generator library"
 readme = "../README.md"
 repository = "https://github.com/light-curve/light-curve-dmdt"
