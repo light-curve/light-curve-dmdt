@@ -23,9 +23,17 @@ repos:
         name: cargo check
     -   id: clippy
         name: cargo clippy
+-   repo: local
+    hooks:
+    -   id: compose-readme
+        name: compose README
+        entry: ./.ci/compose-readme.py
+        language: python
+        pass_filenames: false
+        files: (^\.ci/readme-example\.sh$|^README\.md$|^example\.png$)
 
 # pre-commit.ci settings
 # Skip rust things due to
 # https://github.com/pre-commit-ci/issues/issues/89
 ci:
-    skip: [clippy, cargo-check, fmt]
+    skip: [clippy, cargo-check, fmt, compose-readme]
