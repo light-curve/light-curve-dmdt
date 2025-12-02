@@ -13,10 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump minimum supported Rust version to 1.85
-- Update Rust edition to 2024
-- Update `clap` to 4.5 (removed pinned version constraint)
-- Update dependencies to latest compatible versions
+- **Build breaking** bump minimum supported Rust version to 1.85 https://github.com/light-curve/light-curve-dmdt/pull/93
+- Update Rust edition to 2024 https://github.com/light-curve/light-curve-dmdt/pull/93
 
 ### Deprecated
 
