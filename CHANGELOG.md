@@ -7,29 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
---
-
 ### Changed
 
---
-
-### Deprecated
-
---
-
-### Removed
-
---
-
-### Fixed
-
---
-
-### Security
-
---
+- Bump minimum supported Rust version to 1.85
+- Update Rust edition to 2024
+- Update `clap` to 4.5 (removed pinned version constraint)
+- Update dependencies to latest compatible versions
 
 ## [0.6.2] 2024-12-04
 

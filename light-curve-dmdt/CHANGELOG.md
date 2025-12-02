@@ -7,29 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
---
-
 ### Changed
 
---
-
-### Deprecated
-
---
-
-### Removed
-
---
-
-### Fixed
-
---
-
-### Security
-
---
+- Bump minimum supported Rust version to 1.85
+- Update Rust edition to 2024
+- **Breaking** update `png` to 0.18
+- Update dependencies to latest compatible versions
 
 ## [0.8.0] 2024-12-04
 
