@@ -1,9 +1,9 @@
-use ndarray::{Array2, ArrayRef2};
+use ndarray::{Array2, ArrayView2};
 pub use png;
 use std::io::Write;
 
 /// Convert [u8] dm–dt map into PNG image
-pub fn to_png<W>(w: W, a: &ArrayRef2<u8>) -> Result<(), png::EncodingError>
+pub fn to_png<W>(w: W, a: ArrayView2<'_, u8>) -> Result<(), png::EncodingError>
 where
     W: Write,
 {

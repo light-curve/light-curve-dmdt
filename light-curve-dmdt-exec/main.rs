@@ -70,7 +70,7 @@ fn main() -> Result<(), MainError> {
         Some(path) => Box::new(BufWriter::new(File::create(path)?)),
         None => Box::new(stdout.lock()),
     };
-    to_png(writer, &map_u8)?;
+    to_png(writer, map_u8.view())?;
 
     Ok(())
 }
