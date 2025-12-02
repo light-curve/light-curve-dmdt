@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build breaking** bump minimum supported Rust version to 1.85 https://github.com/light-curve/light-curve-dmdt/pull/93
 - Update Rust edition to 2024 https://github.com/light-curve/light-curve-dmdt/pull/93
 - **Breaking** update `png` to 0.18 https://github.com/light-curve/light-curve-dmdt/pull/93
+- **Breaking** update `ndarray` to 0.17, change public interfaces to use `ArrayRef` instead of `&Array`:
+  - `GridTrait::get_borders()` now returns `&ArrayRef1<T>` instead of `&Array1<T>`
+  - `to_png()` now takes `&ArrayRef2<u8>` instead of `&Array2<u8>`
 
 ### Deprecated
 

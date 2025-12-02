@@ -2,7 +2,7 @@ use crate::Float;
 
 use conv::{ConvAsUtil, ConvUtil, RoundToZero};
 use enum_dispatch::enum_dispatch;
-use ndarray::Array1;
+use ndarray::{Array1, ArrayRef1};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
@@ -14,8 +14,8 @@ pub trait GridTrait<T>: Clone + Debug + Send + Sync
 where
     T: Copy,
 {
-    /// Cell borders coordinates, [cell_count()](GridTrait::cell_count) + 1 length [Array1]
-    fn get_borders(&self) -> &Array1<T>;
+    /// Cell borders coordinates, [cell_count()](GridTrait::cell_count) + 1 length [ArrayRef1]
+    fn get_borders(&self) -> &ArrayRef1<T>;
 
     /// Number of cells
     fn cell_count(&self) -> usize {
@@ -114,7 +114,7 @@ where
     T: Float,
 {
     #[inline]
-    fn get_borders(&self) -> &Array1<T> {
+    fn get_borders(&self) -> &ArrayRef1<T> {
         &self.borders
     }
 
@@ -179,7 +179,7 @@ where
     T: Float,
 {
     #[inline]
-    fn get_borders(&self) -> &Array1<T> {
+    fn get_borders(&self) -> &ArrayRef1<T> {
         &self.borders
     }
 
@@ -295,7 +295,7 @@ where
     T: Float,
 {
     #[inline]
-    fn get_borders(&self) -> &Array1<T> {
+    fn get_borders(&self) -> &ArrayRef1<T> {
         &self.borders
     }
 

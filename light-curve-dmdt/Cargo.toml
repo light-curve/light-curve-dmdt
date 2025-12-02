@@ -27,7 +27,7 @@ embed-doc-image = { version = "0.1.4", optional = true }
 enum_dispatch = "0.3.12"
 itertools = "0.14"
 libm = "0.2.15" # erf
-ndarray = "0.16.1"
+ndarray = "0.17"
 num-traits = "0.2.14"
 png = { version = "0.18", optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
