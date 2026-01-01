@@ -286,6 +286,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
+name = "ellip"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "019e1b1673c50e055127a9a0bc633a9346de73156a67b1d9fc1a0b21e1eea068"
+dependencies = [
+ "num-lazy",
+ "num-traits",
+ "numeric_literals",
+]
+
+[[package]]
 name = "embed-doc-image"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -573,6 +584,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-lazy"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae0667ea2bcc74cbfa6c9d34effb390ef45e989ea8c1418ae049b1cbc29d43f5"
+
+[[package]]
 name = "num-traits"
 version = "0.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -590,6 +607,16 @@ checksum = "91df4bbde75afed763b708b7eee1e8e7651e02d97f6d5dd763e89367e957b23b"
 dependencies = [
  "hermit-abi",
  "libc",
+]
+
+[[package]]
+name = "numeric_literals"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "095aa67b0b9f2081746998f4f17106bdb51d56dc8c211afca5531b92b83bf98a"
+dependencies = [
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -868,10 +895,11 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "special"
-version = "0.11.4"
+version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2037227570e0bedf82a7f866a3e7cebe218ec9cd0d5399151942ee7358f90bb6"
+checksum = "d16afc1a61b6a25a339a6cfbf4cdb68310108abff271edbf8d7d2c8958e2ed20"
 dependencies = [
+ "ellip",
  "lambert_w",
  "libm",
 ]
