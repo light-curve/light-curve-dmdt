@@ -1,10 +1,27 @@
-use crate::{CellIndex, ErfFloat, ErrorFunction, Float, Grid, GridTrait, LgGrid, LinearGrid};
+use crate::{
+    ArrayGridError, BayesianBlocksError, CellIndex, ErfFloat, ErrorFunction, Float, Grid,
+    GridTrait, LgGrid, LinearGrid, bayesian_blocks,
+};
 
 use itertools::Itertools;
 use ndarray::{Array1, Array2, s};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
+use thiserror::Error;
+
+/// Error type for automatic grid creation
+#[derive(Error, Debug)]
+pub enum DmDtAutoGridError {
+    #[error("insufficient dt values, need at least 2 unique time differences")]
+    InsufficientDtValues,
+    #[error("insufficient dm values, need at least 2 unique magnitude differences")]
+    InsufficientDmValues,
+    #[error("Bayesian blocks error: {0}")]
+    BayesianBlocks(#[from] BayesianBlocksError),
+    #[error("grid construction error: {0}")]
+    GridError(#[from] ArrayGridError),
+}
 
 /// dm–dt map plotter
 #[derive(Clone, Debug)]
@@ -48,6 +65,121 @@ where
             LgGrid::from_lg_start_end(min_lgdt, max_lgdt, lgdt_size),
             LinearGrid::new(-max_abs_dm, max_abs_dm, dm_size),
         )
+    }
+
+    /// Create new [DmDt] with dt grid boundaries determined by Bayesian blocks
+    ///
+    /// This method uses the Bayesian blocks algorithm (Scargle et al. 2013) to automatically
+    /// determine optimal bin edges for the dt axis based on the distribution of time differences
+    /// in the input data. The dm grid uses uniform linear spacing.
+    ///
+    /// # Arguments
+    /// * `t` - Sorted time values to analyze for dt grid boundaries
+    /// * `max_abs_dm` - Maximum absolute dm value for the symmetric dm grid
+    /// * `dm_size` - Number of cells in the dm grid
+    /// * `p0` - False alarm probability for Bayesian blocks (typical: 0.05)
+    ///
+    /// # Returns
+    /// A new [DmDt] instance, or an error if Bayesian blocks computation fails
+    ///
+    /// # Example
+    /// ```
+    /// use light_curve_dmdt::DmDt;
+    ///
+    /// let times: Vec<f64> = (0..100).map(|i| i as f64).collect();
+    /// let dmdt = DmDt::from_auto_dt_linear_dm(&times, 3.0, 32, 0.05).unwrap();
+    /// ```
+    pub fn from_auto_dt_linear_dm(
+        t: &[T],
+        max_abs_dm: T,
+        dm_size: usize,
+        p0: f64,
+    ) -> Result<Self, DmDtAutoGridError> {
+        // Compute all dt values from the time series
+        let dt_values = Self::compute_dt_values(t);
+
+        if dt_values.len() < 2 {
+            return Err(DmDtAutoGridError::InsufficientDtValues);
+        }
+
+        // Use Bayesian blocks to find optimal dt grid edges
+        let dt_edges = bayesian_blocks(&dt_values, p0)?;
+
+        let dt_grid = Grid::from_bayesian_blocks(dt_edges)?;
+        let dm_grid = LinearGrid::new(-max_abs_dm, max_abs_dm, dm_size);
+
+        Ok(Self::from_grids(dt_grid, dm_grid))
+    }
+
+    /// Create new [DmDt] with both dt and dm grid boundaries determined by Bayesian blocks
+    ///
+    /// This method uses the Bayesian blocks algorithm for both axes:
+    /// - dt axis: based on distribution of time differences
+    /// - dm axis: based on distribution of magnitude differences
+    ///
+    /// # Arguments
+    /// * `t` - Sorted time values
+    /// * `m` - Magnitude values corresponding to times
+    /// * `p0` - False alarm probability for Bayesian blocks (typical: 0.05)
+    ///
+    /// # Returns
+    /// A new [DmDt] instance, or an error if computation fails
+    pub fn from_auto_grids(t: &[T], m: &[T], p0: f64) -> Result<Self, DmDtAutoGridError> {
+        // Compute all dt and dm values
+        let dt_values = Self::compute_dt_values(t);
+        let dm_values = Self::compute_dm_values(t, m);
+
+        if dt_values.len() < 2 {
+            return Err(DmDtAutoGridError::InsufficientDtValues);
+        }
+        if dm_values.len() < 2 {
+            return Err(DmDtAutoGridError::InsufficientDmValues);
+        }
+
+        // Use Bayesian blocks to find optimal grid edges
+        let dt_edges = bayesian_blocks(&dt_values, p0)?;
+        let dm_edges = bayesian_blocks(&dm_values, p0)?;
+
+        let dt_grid = Grid::from_bayesian_blocks(dt_edges)?;
+        let dm_grid = Grid::from_bayesian_blocks(dm_edges)?;
+
+        Ok(Self::from_grids(dt_grid, dm_grid))
+    }
+
+    /// Compute all time differences from sorted time array
+    fn compute_dt_values(t: &[T]) -> Vec<T> {
+        let n = t.len();
+        if n < 2 {
+            return Vec::new();
+        }
+
+        // Collect all dt values and sort them
+        let mut dt_values: Vec<T> = Vec::with_capacity(n * (n - 1) / 2);
+        for i in 0..n {
+            for j in (i + 1)..n {
+                dt_values.push(t[j] - t[i]);
+            }
+        }
+        dt_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        dt_values
+    }
+
+    /// Compute all magnitude differences, sorted
+    fn compute_dm_values(t: &[T], m: &[T]) -> Vec<T> {
+        let n = t.len();
+        if n < 2 {
+            return Vec::new();
+        }
+
+        // Collect all dm values and sort them
+        let mut dm_values: Vec<T> = Vec::with_capacity(n * (n - 1) / 2);
+        for i in 0..n {
+            for j in (i + 1)..n {
+                dm_values.push(m[j] - m[i]);
+            }
+        }
+        dm_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        dm_values
     }
 
     /// N dt by N dm

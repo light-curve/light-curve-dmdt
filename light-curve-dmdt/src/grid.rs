@@ -71,6 +71,17 @@ where
     pub fn log_from_lg_start_end(lg_start: T, lg_end: T, n: usize) -> Self {
         LgGrid::from_lg_start_end(lg_start, lg_end, n).into()
     }
+
+    /// Create a grid from Bayesian blocks edges
+    ///
+    /// # Arguments
+    /// * `edges` - Array of bin edges computed by Bayesian blocks algorithm
+    ///
+    /// # Returns
+    /// An ArrayGrid with the given edges as cell borders
+    pub fn from_bayesian_blocks(edges: Array1<T>) -> Result<Self, ArrayGridError> {
+        ArrayGrid::new(edges).map(Into::into)
+    }
 }
 
 /// An error to be returned from grid constructors
