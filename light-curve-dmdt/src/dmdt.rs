@@ -95,17 +95,14 @@ where
         dm_size: usize,
         p0: f64,
     ) -> Result<Self, DmDtAutoGridError> {
-        // Compute all dt values from the time series
-        let dt_values = Self::compute_dt_values(t);
+        let dt_values = Self::sorted_dt(t);
 
         if dt_values.len() < 2 {
             return Err(DmDtAutoGridError::InsufficientDtValues);
         }
 
-        // Use Bayesian blocks to find optimal dt grid edges
         let dt_edges = bayesian_blocks(&dt_values, p0)?;
-
-        let dt_grid = Grid::from_bayesian_blocks(dt_edges)?;
+        let dt_grid = Grid::from_sorted_edges(dt_edges)?;
         let dm_grid = LinearGrid::new(-max_abs_dm, max_abs_dm, dm_size);
 
         Ok(Self::from_grids(dt_grid, dm_grid))
@@ -125,9 +122,8 @@ where
     /// # Returns
     /// A new [DmDt] instance, or an error if computation fails
     pub fn from_auto_grids(t: &[T], m: &[T], p0: f64) -> Result<Self, DmDtAutoGridError> {
-        // Compute all dt and dm values
-        let dt_values = Self::compute_dt_values(t);
-        let dm_values = Self::compute_dm_values(t, m);
+        let dt_values = Self::sorted_dt(t);
+        let dm_values = Self::sorted_dm(m);
 
         if dt_values.len() < 2 {
             return Err(DmDtAutoGridError::InsufficientDtValues);
@@ -136,48 +132,41 @@ where
             return Err(DmDtAutoGridError::InsufficientDmValues);
         }
 
-        // Use Bayesian blocks to find optimal grid edges
         let dt_edges = bayesian_blocks(&dt_values, p0)?;
         let dm_edges = bayesian_blocks(&dm_values, p0)?;
 
-        let dt_grid = Grid::from_bayesian_blocks(dt_edges)?;
-        let dm_grid = Grid::from_bayesian_blocks(dm_edges)?;
+        let dt_grid = Grid::from_sorted_edges(dt_edges)?;
+        let dm_grid = Grid::from_sorted_edges(dm_edges)?;
 
         Ok(Self::from_grids(dt_grid, dm_grid))
     }
 
-    /// Compute all time differences from sorted time array
-    fn compute_dt_values(t: &[T]) -> Vec<T> {
+    /// Compute all pairwise time differences, sorted in ascending order
+    fn sorted_dt(t: &[T]) -> Vec<T> {
         let n = t.len();
         if n < 2 {
             return Vec::new();
         }
 
-        // Collect all dt values and sort them
-        let mut dt_values: Vec<T> = Vec::with_capacity(n * (n - 1) / 2);
-        for i in 0..n {
-            for j in (i + 1)..n {
-                dt_values.push(t[j] - t[i]);
-            }
-        }
+        let mut dt_values: Vec<T> = (0..n)
+            .flat_map(|i| (i + 1..n).map(move |j| (i, j)))
+            .map(|(i, j)| t[j] - t[i])
+            .collect();
         dt_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
         dt_values
     }
 
-    /// Compute all magnitude differences, sorted
-    fn compute_dm_values(t: &[T], m: &[T]) -> Vec<T> {
-        let n = t.len();
+    /// Compute all pairwise magnitude differences, sorted in ascending order
+    fn sorted_dm(m: &[T]) -> Vec<T> {
+        let n = m.len();
         if n < 2 {
             return Vec::new();
         }
 
-        // Collect all dm values and sort them
-        let mut dm_values: Vec<T> = Vec::with_capacity(n * (n - 1) / 2);
-        for i in 0..n {
-            for j in (i + 1)..n {
-                dm_values.push(m[j] - m[i]);
-            }
-        }
+        let mut dm_values: Vec<T> = (0..n)
+            .flat_map(|i| (i + 1..n).map(move |j| (i, j)))
+            .map(|(i, j)| m[j] - m[i])
+            .collect();
         dm_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
         dm_values
     }

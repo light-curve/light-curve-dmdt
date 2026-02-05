@@ -6,10 +6,8 @@ use thiserror::Error;
 /// Error types for Bayesian Blocks algorithm
 #[derive(Error, Debug)]
 pub enum BayesianBlocksError {
-    #[error("input data is empty")]
-    EmptyData,
-    #[error("input data must have at least 2 points")]
-    InsufficientData,
+    #[error("input data must have at least {0} points, got {1}")]
+    InsufficientData(usize, usize),
     #[error("prior parameter p0 must be in (0, 1), got {0}")]
     InvalidP0(f64),
     #[error("prior parameter gamma must be positive, got {0}")]
@@ -18,16 +16,38 @@ pub enum BayesianBlocksError {
     InvalidNcpPrior(f64),
 }
 
+/// Constants for the p0-to-ncp_prior conversion from Scargle et al. 2013.
+///
+/// From Section 3.3, Eq. 21 of "Studies in Astronomical Time Series Analysis. VI.
+/// Bayesian Block Representations" (Scargle et al. 2013, ApJ 764:167):
+/// <https://doi.org/10.1088/0004-637X/764/2/167>
+///
+/// The formula is: ncp_prior = 4 - ln(73.53 * p0 * N^(-0.478))
+///
+/// These constants were determined empirically by the authors through simulations
+/// to calibrate the false positive rate for the events fitness function.
+mod p0_prior_constants {
+    /// Additive constant in the ncp_prior formula
+    pub const ADDITIVE: f64 = 4.0;
+    /// Multiplicative factor inside the logarithm
+    pub const MULTIPLIER: f64 = 73.53;
+    /// Exponent for the data size N
+    pub const EXPONENT: f64 = -0.478;
+}
+
 /// Prior specification for Bayesian Blocks
 ///
 /// Controls the penalty for adding change points. Higher values = fewer blocks.
 #[derive(Clone, Debug)]
 pub enum Prior<T> {
-    /// False alarm probability. Typical value: 0.05
-    /// ncp_prior = 4 - ln(73.53 * p0 * N^(-0.478))
+    /// False alarm probability (typical: 0.05).
+    ///
+    /// Converted to ncp_prior using empirical calibration from Scargle et al. 2013, Eq. 21:
+    /// `ncp_prior = 4 - ln(73.53 * p0 * N^(-0.478))`
     P0(T),
     /// Geometric prior on number of blocks: P(N_blocks) ∝ gamma^N_blocks
-    /// ncp_prior = -ln(gamma)
+    ///
+    /// Converted as: `ncp_prior = -ln(gamma)`
     Gamma(T),
     /// Direct specification of the prior penalty per change point
     NcpPrior(T),
@@ -35,7 +55,6 @@ pub enum Prior<T> {
 
 impl<T: Float> Default for Prior<T> {
     fn default() -> Self {
-        // Default p0 = 0.05 is a common choice
         Prior::P0(T::from(0.05).unwrap())
     }
 }
@@ -75,6 +94,8 @@ impl<T: Float> Default for BayesianBlocks<T> {
 }
 
 impl<T: Float> BayesianBlocks<T> {
+    const MIN_DATA_POINTS: usize = 2;
+
     /// Create a new BayesianBlocks with default settings
     pub fn new() -> Self {
         Self::default()
@@ -97,12 +118,15 @@ impl<T: Float> BayesianBlocks<T> {
         match self.prior {
             Prior::P0(p0) => {
                 let p0_f64 = p0.to_f64().unwrap();
-                if p0_f64 <= 0.0 || p0_f64 >= 1.0 {
+                if !(0.0..1.0).contains(&p0_f64) || p0_f64 == 0.0 {
                     return Err(BayesianBlocksError::InvalidP0(p0_f64));
                 }
-                // ncp_prior = 4 - ln(73.53 * p0 * N^(-0.478))
-                let n_f64 = n as f64;
-                let ncp = 4.0 - (73.53 * p0_f64 * n_f64.powf(-0.478)).ln();
+                // Scargle et al. 2013, Eq. 21
+                let ncp = p0_prior_constants::ADDITIVE
+                    - (p0_prior_constants::MULTIPLIER
+                        * p0_f64
+                        * (n as f64).powf(p0_prior_constants::EXPONENT))
+                    .ln();
                 Ok(T::from(ncp).unwrap())
             }
             Prior::Gamma(gamma) => {
@@ -132,10 +156,7 @@ impl<T: Float> BayesianBlocks<T> {
     pub fn find_bins(&self, t: &[T]) -> Result<Array1<T>, BayesianBlocksError> {
         match self.fitness {
             FitnessFunc::Events => self.find_bins_events(t),
-            FitnessFunc::PointMeasures => {
-                // For point measures without explicit values/errors, treat as events
-                self.find_bins_events(t)
-            }
+            FitnessFunc::PointMeasures => self.find_bins_events(t),
         }
     }
 
@@ -154,75 +175,125 @@ impl<T: Float> BayesianBlocks<T> {
         x: &[T],
         sigma: &[T],
     ) -> Result<Array1<T>, BayesianBlocksError> {
-        if t.is_empty() {
-            return Err(BayesianBlocksError::EmptyData);
-        }
-        if t.len() < 2 {
-            return Err(BayesianBlocksError::InsufficientData);
+        if t.len() < Self::MIN_DATA_POINTS {
+            return Err(BayesianBlocksError::InsufficientData(
+                Self::MIN_DATA_POINTS,
+                t.len(),
+            ));
         }
 
         let n = t.len();
         let ncp_prior = self.compute_ncp_prior(n)?;
 
-        // Compute edges (including endpoints)
-        let mut edges = Array1::zeros(n + 1);
-        edges[0] = t[0];
-        for i in 1..n {
-            edges[i] = T::half() * (t[i - 1] + t[i]);
+        // Compute edges: first point, midpoints between consecutive points, last point
+        let edges: Array1<T> = std::iter::once(t[0])
+            .chain(t.windows(2).map(|w| T::half() * (w[0] + w[1])))
+            .chain(std::iter::once(t[n - 1]))
+            .collect();
+
+        // Precompute cumulative sums for fitness calculation
+        // a_sum[i] = sum(1/sigma_j^2) for j in 0..i
+        // b_sum[i] = sum(x_j/sigma_j^2) for j in 0..i
+        let (a_sum, b_sum): (Vec<T>, Vec<T>) = std::iter::once((T::zero(), T::zero()))
+            .chain(sigma.iter().zip(x.iter()).scan(
+                (T::zero(), T::zero()),
+                |(a_acc, b_acc), (&s, &xi)| {
+                    let inv_var = T::one() / (s * s);
+                    *a_acc += inv_var;
+                    *b_acc += xi * inv_var;
+                    Some((*a_acc, *b_acc))
+                },
+            ))
+            .unzip();
+
+        // Dynamic programming: best[r] = best fitness ending at position r
+        //                      last[r] = start index of best block ending at r
+        let (_best, last) = (0..n).fold(
+            (vec![T::neg_infinity(); n], vec![0usize; n]),
+            |(mut best, mut last), r| {
+                // Fitness for block [k..=r]: (b_k^2) / (4 * a_k) where
+                // a_k = a_sum[r+1] - a_sum[k], b_k = b_sum[r+1] - b_sum[k]
+                let (i_max, max_val) = (0..=r)
+                    .map(|k| {
+                        let a_k = a_sum[r + 1] - a_sum[k];
+                        let b_k = b_sum[r + 1] - b_sum[k];
+                        let fitness = if a_k > T::zero() {
+                            (b_k * b_k) / (T::from(4.0).unwrap() * a_k)
+                        } else {
+                            T::zero()
+                        };
+                        let score =
+                            fitness - ncp_prior + if k > 0 { best[k - 1] } else { T::zero() };
+                        (k, score)
+                    })
+                    .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+                    .unwrap();
+
+                last[r] = i_max;
+                best[r] = max_val;
+                (best, last)
+            },
+        );
+
+        Ok(Self::backtrack_edges(&edges, &last, n))
+    }
+
+    /// Internal: Find bins for event data using dynamic programming
+    fn find_bins_events(&self, t: &[T]) -> Result<Array1<T>, BayesianBlocksError> {
+        if t.len() < Self::MIN_DATA_POINTS {
+            return Err(BayesianBlocksError::InsufficientData(
+                Self::MIN_DATA_POINTS,
+                t.len(),
+            ));
         }
-        edges[n] = t[n - 1];
 
-        // Precompute variance (sigma^2)
-        let var: Vec<T> = sigma.iter().map(|&s| s * s).collect();
+        let n = t.len();
+        let ncp_prior = self.compute_ncp_prior(n)?;
 
-        // For point measures: fitness = (b_k^2) / (4 * a_k)
-        // where a_k = sum(1/sigma_i^2) and b_k = sum(x_i/sigma_i^2)
-        // Precompute cumulative sums for efficiency
-        let mut a_sum = vec![T::zero(); n + 1]; // cumsum of 1/var
-        let mut b_sum = vec![T::zero(); n + 1]; // cumsum of x/var
-        for i in 0..n {
-            let inv_var = T::one() / var[i];
-            a_sum[i + 1] = a_sum[i] + inv_var;
-            b_sum[i + 1] = b_sum[i] + x[i] * inv_var;
-        }
+        // Compute edges: first point, midpoints between consecutive points, last point
+        let edges: Array1<T> = std::iter::once(t[0])
+            .chain(t.windows(2).map(|w| T::half() * (w[0] + w[1])))
+            .chain(std::iter::once(t[n - 1]))
+            .collect();
 
-        // Dynamic programming arrays
-        let mut best = vec![T::neg_infinity(); n];
-        let mut last = vec![0usize; n];
+        // Block length from edge i to the last edge
+        let last_edge = edges[n];
+        let block_length: Vec<T> = edges.iter().map(|&e| last_edge - e).collect();
 
-        // Main loop
-        for r in 0..n {
-            // Compute fitness for blocks [k..=r] for all k in 0..=r
-            let mut fit_vec = vec![T::zero(); r + 1];
-            for k in 0..=r {
-                let a_k = a_sum[r + 1] - a_sum[k];
-                let b_k = b_sum[r + 1] - b_sum[k];
-                if a_k > T::zero() {
-                    fit_vec[k] = (b_k * b_k) / (T::from(4.0).unwrap() * a_k);
-                }
-            }
+        // Dynamic programming
+        let (_best, last) = (0..n).fold(
+            (vec![T::neg_infinity(); n], vec![0usize; n]),
+            |(mut best, mut last), r| {
+                // Fitness for block [k..=r]: N_k * ln(N_k / T_k)
+                // N_k = r - k + 1, T_k = block_length[k] - block_length[r+1]
+                let (i_max, max_val) = (0..=r)
+                    .map(|k| {
+                        let n_k = T::from(r - k + 1).unwrap();
+                        let t_k = block_length[k] - block_length[r + 1];
+                        let fitness = if t_k > T::zero() {
+                            n_k * (n_k / t_k).ln()
+                        } else {
+                            T::zero()
+                        };
+                        let score =
+                            fitness - ncp_prior + if k > 0 { best[k - 1] } else { T::zero() };
+                        (k, score)
+                    })
+                    .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+                    .unwrap();
 
-            // Apply prior penalty and add previous best
-            let mut a_r = vec![T::zero(); r + 1];
-            for k in 0..=r {
-                a_r[k] = fit_vec[k] - ncp_prior;
-                if k > 0 {
-                    a_r[k] += best[k - 1];
-                }
-            }
+                last[r] = i_max;
+                best[r] = max_val;
+                (best, last)
+            },
+        );
 
-            // Find best configuration
-            let (i_max, max_val) = a_r
-                .iter()
-                .enumerate()
-                .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                .unwrap();
+        Ok(Self::backtrack_edges(&edges, &last, n))
+    }
 
-            last[r] = i_max;
-            best[r] = *max_val;
-        }
-
-        // Backtrack to find change points
+    /// Backtrack through the `last` array to find change points and extract edges
+    fn backtrack_edges(edges: &Array1<T>, last: &[usize], n: usize) -> Array1<T> {
+        // Collect change points by backtracking: start at n-1, follow last[] chain
         let mut change_points = vec![n];
         let mut i = n - 1;
         loop {
@@ -234,89 +305,7 @@ impl<T: Float> BayesianBlocks<T> {
         }
         change_points.reverse();
 
-        // Extract edges at change points
-        let result: Array1<T> = change_points.iter().map(|&i| edges[i]).collect();
-        Ok(result)
-    }
-
-    /// Internal: Find bins for event data
-    fn find_bins_events(&self, t: &[T]) -> Result<Array1<T>, BayesianBlocksError> {
-        if t.is_empty() {
-            return Err(BayesianBlocksError::EmptyData);
-        }
-        if t.len() < 2 {
-            return Err(BayesianBlocksError::InsufficientData);
-        }
-
-        let n = t.len();
-        let ncp_prior = self.compute_ncp_prior(n)?;
-
-        // Compute edges (cell boundaries between data points)
-        let mut edges = Array1::zeros(n + 1);
-        edges[0] = t[0];
-        for i in 1..n {
-            edges[i] = T::half() * (t[i - 1] + t[i]);
-        }
-        edges[n] = t[n - 1];
-
-        // Block lengths from each edge to the end
-        let last_edge = edges[n];
-        let block_length: Vec<T> = edges.iter().map(|&e| last_edge - e).collect();
-
-        // Dynamic programming arrays
-        let mut best = vec![T::neg_infinity(); n];
-        let mut last_idx = vec![0usize; n];
-
-        // Main loop: iterate through each position
-        for r in 0..n {
-            // For events fitness: N_k * ln(N_k / T_k)
-            // N_k = number of points in block [k..=r] = r - k + 1
-            // T_k = block width = block_length[k] - block_length[r+1]
-
-            let mut fit_vec = vec![T::zero(); r + 1];
-            for k in 0..=r {
-                let n_k = T::from(r - k + 1).unwrap();
-                let t_k = block_length[k] - block_length[r + 1];
-                if t_k > T::zero() && n_k > T::zero() {
-                    fit_vec[k] = n_k * (n_k / t_k).ln();
-                }
-            }
-
-            // Apply prior penalty and add previous best
-            let mut a_r = vec![T::zero(); r + 1];
-            for k in 0..=r {
-                a_r[k] = fit_vec[k] - ncp_prior;
-                if k > 0 {
-                    a_r[k] += best[k - 1];
-                }
-            }
-
-            // Find best configuration
-            let (i_max, max_val) = a_r
-                .iter()
-                .enumerate()
-                .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-                .unwrap();
-
-            last_idx[r] = i_max;
-            best[r] = *max_val;
-        }
-
-        // Backtrack to find change points
-        let mut change_points = vec![n];
-        let mut i = n - 1;
-        loop {
-            change_points.push(last_idx[i]);
-            if last_idx[i] == 0 {
-                break;
-            }
-            i = last_idx[i] - 1;
-        }
-        change_points.reverse();
-
-        // Extract edges at change points
-        let result: Array1<T> = change_points.iter().map(|&i| edges[i]).collect();
-        Ok(result)
+        change_points.into_iter().map(|idx| edges[idx]).collect()
     }
 }
 
@@ -367,58 +356,71 @@ pub fn bayesian_blocks_with_errors<T: Float>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use approx::assert_abs_diff_eq;
 
+    /// Test against astropy.stats.bayesian_blocks reference implementation
+    ///
+    /// Generated with:
+    /// ```python
+    /// from astropy.stats import bayesian_blocks
+    /// import numpy as np
+    /// t = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    /// edges = bayesian_blocks(t, fitness='events', p0=0.05)
+    /// # Result: [0.0, 4.0]
+    /// ```
     #[test]
-    fn test_uniform_data() {
-        // Uniformly spaced data should produce few blocks
-        let t: Vec<f64> = (0..100).map(|i| i as f64).collect();
+    fn test_astropy_simple_uniform() {
+        let t: Vec<f64> = vec![0.0, 1.0, 2.0, 3.0, 4.0];
         let edges = bayesian_blocks(&t, 0.05).unwrap();
 
-        // With uniform data, we expect relatively few change points
-        assert!(edges.len() >= 2); // At least start and end
-        assert!(edges.len() <= 10); // Shouldn't have too many blocks
+        // astropy returns [0.0, 4.0] for this uniform data
+        assert_eq!(edges.len(), 2);
+        assert_abs_diff_eq!(edges[0], 0.0, epsilon = 1e-10);
+        assert_abs_diff_eq!(edges[1], 4.0, epsilon = 1e-10);
     }
 
+    /// Test rate change detection against astropy reference
+    ///
+    /// Generated with:
+    /// ```python
+    /// from astropy.stats import bayesian_blocks
+    /// import numpy as np
+    /// t_sparse = np.arange(0, 50, 2.0)  # 25 points
+    /// t_dense = 50.0 + np.arange(0, 25, 0.5)  # 50 points
+    /// t = np.concatenate([t_sparse, t_dense])
+    /// edges = bayesian_blocks(t, fitness='events', p0=0.05)
+    /// # Result: [0.0, 50.25, 74.5]
+    /// ```
     #[test]
-    fn test_rate_change() {
-        // Data with rate change should detect it
-        let mut t: Vec<f64> = Vec::new();
-        // First half: sparse (step = 2)
-        for i in 0..50 {
-            t.push(i as f64 * 2.0);
-        }
-        // Second half: dense (step = 0.5)
-        let offset = 100.0;
-        for i in 0..100 {
-            t.push(offset + i as f64 * 0.5);
-        }
+    fn test_astropy_rate_change() {
+        let t_sparse: Vec<f64> = (0..25).map(|i| i as f64 * 2.0).collect();
+        let t_dense: Vec<f64> = (0..50).map(|i| 50.0 + i as f64 * 0.5).collect();
+        let t: Vec<f64> = t_sparse.into_iter().chain(t_dense).collect();
 
         let edges = bayesian_blocks(&t, 0.05).unwrap();
 
-        // Should detect at least one change point around the rate change
-        assert!(edges.len() >= 3); // Start, change point, end
-
-        // The change should be detected somewhere around t=100
-        let has_change_near_100 = edges
-            .iter()
-            .skip(1)
-            .take(edges.len() - 2)
-            .any(|&e| e > 90.0 && e < 110.0);
-        assert!(has_change_near_100);
-    }
-
-    #[test]
-    fn test_empty_data() {
-        let t: Vec<f64> = vec![];
-        let result = bayesian_blocks(&t, 0.05);
-        assert!(matches!(result, Err(BayesianBlocksError::EmptyData)));
+        // astropy returns [0.0, 50.25, 74.5]
+        assert_eq!(edges.len(), 3);
+        assert_abs_diff_eq!(edges[0], 0.0, epsilon = 1e-10);
+        assert_abs_diff_eq!(edges[1], 50.25, epsilon = 1e-10);
+        assert_abs_diff_eq!(edges[2], 74.5, epsilon = 1e-10);
     }
 
     #[test]
     fn test_insufficient_data() {
-        let t: Vec<f64> = vec![1.0];
-        let result = bayesian_blocks(&t, 0.05);
-        assert!(matches!(result, Err(BayesianBlocksError::InsufficientData)));
+        let empty: Vec<f64> = vec![];
+        let result = bayesian_blocks(&empty, 0.05);
+        assert!(matches!(
+            result,
+            Err(BayesianBlocksError::InsufficientData(2, 0))
+        ));
+
+        let single: Vec<f64> = vec![1.0];
+        let result = bayesian_blocks(&single, 0.05);
+        assert!(matches!(
+            result,
+            Err(BayesianBlocksError::InsufficientData(2, 1))
+        ));
     }
 
     #[test]
@@ -434,11 +436,15 @@ mod tests {
             .with_prior(Prior::P0(1.0))
             .find_bins(&t);
         assert!(matches!(result, Err(BayesianBlocksError::InvalidP0(_))));
+
+        let result = BayesianBlocks::new()
+            .with_prior(Prior::P0(-0.1))
+            .find_bins(&t);
+        assert!(matches!(result, Err(BayesianBlocksError::InvalidP0(_))));
     }
 
     #[test]
     fn test_point_measures() {
-        // Test with point measurements
         let t: Vec<f64> = (0..50).map(|i| i as f64).collect();
         let x: Vec<f64> = t.iter().map(|&ti| (ti * 0.1).sin()).collect();
         let sigma: Vec<f64> = vec![0.1; 50];
@@ -452,7 +458,6 @@ mod tests {
         let t: Vec<f64> = (0..100).map(|i| i as f64 * 0.5).collect();
         let edges = bayesian_blocks(&t, 0.05).unwrap();
 
-        // Edges should be sorted
         for i in 1..edges.len() {
             assert!(edges[i] > edges[i - 1], "Edges must be strictly ascending");
         }
@@ -463,29 +468,26 @@ mod tests {
         let t: Vec<f64> = (0..100).map(|i| i as f64).collect();
         let edges = bayesian_blocks(&t, 0.05).unwrap();
 
-        // First edge should be at or before first data point
-        assert!(edges[0] <= t[0] + 1e-10);
-        // Last edge should be at or after last data point
-        assert!(edges[edges.len() - 1] >= t[t.len() - 1] - 1e-10);
+        assert_abs_diff_eq!(edges[0], t[0], epsilon = 1e-10);
+        assert_abs_diff_eq!(edges[edges.len() - 1], t[t.len() - 1], epsilon = 1e-10);
     }
 
     #[test]
     fn test_gamma_prior() {
         let t: Vec<f64> = (0..100).map(|i| i as f64).collect();
 
-        // gamma = 1 means no penalty for change points (many blocks)
-        // gamma << 1 means strong penalty (few blocks)
+        // Lower gamma = stronger penalty = fewer blocks
         let edges_low_gamma = BayesianBlocks::new()
             .with_prior(Prior::Gamma(0.01))
             .find_bins(&t)
             .unwrap();
 
+        // Higher gamma = weaker penalty = more blocks
         let edges_high_gamma = BayesianBlocks::new()
             .with_prior(Prior::Gamma(0.9))
             .find_bins(&t)
             .unwrap();
 
-        // Higher gamma should give more blocks (or equal)
         assert!(edges_high_gamma.len() >= edges_low_gamma.len());
     }
 
@@ -493,6 +495,18 @@ mod tests {
     fn test_f32_support() {
         let t: Vec<f32> = (0..50).map(|i| i as f32).collect();
         let edges = bayesian_blocks(&t, 0.05).unwrap();
+        assert!(edges.len() >= 2);
+    }
+
+    #[test]
+    fn test_ncp_prior_direct() {
+        let t: Vec<f64> = (0..50).map(|i| i as f64).collect();
+
+        // Direct ncp_prior specification should work
+        let edges = BayesianBlocks::new()
+            .with_prior(Prior::NcpPrior(4.0))
+            .find_bins(&t)
+            .unwrap();
         assert!(edges.len() >= 2);
     }
 }

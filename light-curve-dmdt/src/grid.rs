@@ -72,14 +72,14 @@ where
         LgGrid::from_lg_start_end(lg_start, lg_end, n).into()
     }
 
-    /// Create a grid from Bayesian blocks edges
+    /// Create a grid from sorted bin edges
     ///
     /// # Arguments
-    /// * `edges` - Array of bin edges computed by Bayesian blocks algorithm
+    /// * `edges` - Array of bin edges in ascending order (e.g., from Bayesian blocks)
     ///
     /// # Returns
     /// An ArrayGrid with the given edges as cell borders
-    pub fn from_bayesian_blocks(edges: Array1<T>) -> Result<Self, ArrayGridError> {
+    pub fn from_sorted_edges(edges: Array1<T>) -> Result<Self, ArrayGridError> {
         ArrayGrid::new(edges).map(Into::into)
     }
 }
