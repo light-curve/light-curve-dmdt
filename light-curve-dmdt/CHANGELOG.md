@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New module `bayesian_blocks` with `BayesianBlocks` struct and convenience functions
   - `DmDt::from_auto_dt_linear_dm()` for automatic dt grid with linear dm grid
   - `DmDt::from_auto_grids()` for automatic boundaries on both axes
-  - `Grid::from_bayesian_blocks()` to create grids from Bayesian blocks edges
 
 ### Changed
 

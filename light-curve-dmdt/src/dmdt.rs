@@ -102,7 +102,7 @@ where
         }
 
         let dt_edges = bayesian_blocks(&dt_values, p0)?;
-        let dt_grid = Grid::from_sorted_edges(dt_edges)?;
+        let dt_grid = Grid::array(dt_edges)?;
         let dm_grid = LinearGrid::new(-max_abs_dm, max_abs_dm, dm_size);
 
         Ok(Self::from_grids(dt_grid, dm_grid))
@@ -135,8 +135,8 @@ where
         let dt_edges = bayesian_blocks(&dt_values, p0)?;
         let dm_edges = bayesian_blocks(&dm_values, p0)?;
 
-        let dt_grid = Grid::from_sorted_edges(dt_edges)?;
-        let dm_grid = Grid::from_sorted_edges(dm_edges)?;
+        let dt_grid = Grid::array(dt_edges)?;
+        let dm_grid = Grid::array(dm_edges)?;
 
         Ok(Self::from_grids(dt_grid, dm_grid))
     }
