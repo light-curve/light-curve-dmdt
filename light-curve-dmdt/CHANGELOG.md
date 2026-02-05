@@ -9,7 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
---
+- Bayesian blocks algorithm for automatic dm-dt grid boundary selection
+  (Scargle et al. 2013) https://github.com/light-curve/light-curve-dmdt/issues/1
+  - New module `bayesian_blocks` with `BayesianBlocks` struct and convenience functions
+  - `DmDt::from_auto_dt_linear_dm()` for automatic dt grid with linear dm grid
+  - `DmDt::from_auto_grids()` for automatic boundaries on both axes
 
 ### Changed
 
