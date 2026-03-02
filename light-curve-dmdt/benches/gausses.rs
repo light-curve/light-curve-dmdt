@@ -1,7 +1,8 @@
 use conv::*;
-use criterion::{Criterion, black_box};
+use criterion::Criterion;
 use light_curve_dmdt::{DmDt, Eps1Over1e3Erf, ErfFloat, ExactErf};
 use ndarray::Array1;
+use std::hint::black_box;
 
 pub fn bench_gausses<T>(c: &mut Criterion)
 where
