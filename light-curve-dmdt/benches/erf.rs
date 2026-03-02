@@ -1,6 +1,6 @@
 use criterion::Criterion;
-use std::hint::black_box;
 use light_curve_dmdt::{ErfFloat, Float};
+use std::hint::black_box;
 
 pub trait BenchFloat: Sized {
     const X_FOR_ERF: [Self; 13];
