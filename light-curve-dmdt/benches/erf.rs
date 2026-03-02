@@ -1,4 +1,5 @@
-use criterion::{Criterion, black_box};
+use criterion::Criterion;
+use std::hint::black_box;
 use light_curve_dmdt::{ErfFloat, Float};
 
 pub trait BenchFloat: Sized {
