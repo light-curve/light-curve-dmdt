@@ -36,7 +36,7 @@ thiserror = "2"
 [dev-dependencies]
 light-curve-dmdt = { path = ".", features = ["full"] }
 approx = "0.5"
-criterion = "0.5"
+criterion = "0.7"
 mathru = "0.16"
 special = "0.12"
 static_assertions = "1.1"

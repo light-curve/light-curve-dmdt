@@ -1,7 +1,8 @@
 use conv::*;
-use criterion::{Criterion, black_box};
+use criterion::Criterion;
 use light_curve_dmdt::{DmDt, Float, Grid, GridTrait, LinearGrid};
 use ndarray::Array1;
+use std::hint::black_box;
 
 pub fn bench_linear_grid_idx(c: &mut Criterion) {
     let values = [-0.1_f32, 0.0, 0.5, 0.9, 1.0, 1.1];

@@ -1,6 +1,7 @@
-use criterion::{Criterion, black_box};
+use criterion::Criterion;
 use light_curve_dmdt::{DmDt, Eps1Over1e3Erf};
 use ndarray::Array1;
+use std::hint::black_box;
 
 pub fn bench_cond_prob(c: &mut Criterion) {
     let dmdt = DmDt::from_lgdt_dm_limits(0.0_f32, 2.0_f32, 32, 1.25_f32, 32);
