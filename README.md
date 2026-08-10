@@ -1,3 +1,12 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)"
+            srcset="https://raw.githubusercontent.com/light-curve/light-curve-dmdt/master/assets/logo/wordmark-for-dark-bg.svg">
+    <img src="https://raw.githubusercontent.com/light-curve/light-curve-dmdt/master/assets/logo/wordmark-for-light-bg.svg"
+         alt="light-curve" width="320">
+  </picture>
+</p>
+
 # dm–dt map plotter
 
 [![docs.rs badge](https://docs.rs/light-curve-dmdt/badge.svg)](https://docs.rs/light-curve-dmdt)
