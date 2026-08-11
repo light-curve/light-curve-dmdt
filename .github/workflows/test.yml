@@ -16,10 +16,14 @@ jobs:
       run: cargo test --all-features --workspace
 
   fmt:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
 
     steps:
     - uses: actions/checkout@v7
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: stable
+        components: rustfmt
     - name: cargo-fmt
       run: cargo fmt -- --check
 
@@ -55,7 +59,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Get minimum supported Rust version
-        run: echo "::set-output name=msrv::$(grep '^rust-version = ' Cargo.toml | grep -o '[0-9.]\+')"
+        run: echo "msrv=$(grep '^rust-version = ' Cargo.toml | grep -o '[0-9.]\+')" >> $GITHUB_OUTPUT
         id: get_msrv
       - uses: dtolnay/rust-toolchain@master
         with:
