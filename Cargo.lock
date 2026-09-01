@@ -891,9 +891,9 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "special"
-version = "0.13.2"
+version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96a46c699f08ad3ad5523e1378974a0b5f764ba154e17939efb2ad3d9d991958"
+checksum = "89da6d910fda05fcf6b8cadaaafe9f8ca1e51d5c78d3832917b569e8db38111e"
 dependencies = [
  "ellip",
  "lambert_w 2.0.1",
