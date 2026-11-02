@@ -284,9 +284,9 @@ checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
 
 [[package]]
 name = "ellip"
-version = "1.1.1"
+version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ddf8add35b2174706baf49bac13fd472a423b62829c0a1878e4e57926a8c8c89"
+checksum = "5028f7214cfbc86fba8df7f65785e183c7406270817fb1d2f6df7c4684a753e7"
 dependencies = [
  "num-lazy",
  "num-traits",
@@ -891,9 +891,9 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "special"
-version = "0.14.1"
+version = "0.14.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "89da6d910fda05fcf6b8cadaaafe9f8ca1e51d5c78d3832917b569e8db38111e"
+checksum = "432921d6969f9b886a7cb0214e60bd31067831a3df49e082e10dbedb9725eda6"
 dependencies = [
  "ellip",
  "lambert_w 2.0.1",
